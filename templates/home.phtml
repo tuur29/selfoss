@@ -92,7 +92,7 @@
     <div id="loginform">
         <form action="<?= $this->base; ?>" method="post">
         <ul id="login">
-            <li><h1>selfoss login</h1></li>
+            <li><h1><?= trim(\F3::get('html_title')); ?> login</h1></li>
             <li><label for="username"><?= trim(\F3::get('lang_login_username')); ?>:</label> <input type="text" name="username" id="username"></li>
             <li><label for="password"><?= trim(\F3::get('lang_login_password')); ?>:</label> <input type="password" name="password" id="password"></li>
             <li class="error"></li>
@@ -110,7 +110,7 @@
 
         <!-- navigation -->
         <div id="nav" role="navigation">
-            <div id="nav-logo"></div>
+            <div id="nav-logo"><?= trim(\F3::get('html_title')); ?></div>
             <button id="nav-mark"><?= \F3::get('lang_markread')?></button>
 
             <div id="nav-filter-wrapper">
