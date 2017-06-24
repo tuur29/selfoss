@@ -114,10 +114,6 @@ selfoss.events.entries = function(e) {
             }
         } 
     });
-
-    // no source click
-    if(selfoss.isSmartphone())
-        $('.entry-icon, .entry-datetime').unbind('click').click(function(e) {e.preventDefault(); return false });
     
     // scroll load more
     $(window).unbind('scroll').scroll(function() {
@@ -166,6 +162,16 @@ selfoss.events.entries = function(e) {
         });
     });
 
+    // mark as read when clicking icon
+    if (selfoss.isSmartphone() == false) {
+        $('.entry-icon').unbind('click').on('click',function(e){
+            e.preventDefault();
+            var entry = $(this).parents('.entry');
+            entry.find('.entry-toolbar .entry-unread').click();
+            entry.find('.entry-title').click();
+        });
+    }
+
     // click a source
     if (selfoss.isSmartphone() == false) {
         $('.entry-source').unbind('click').click(function(e) {
@@ -185,6 +191,15 @@ selfoss.events.entries = function(e) {
                     return false;
                 }
             });
+        });
+    }
+
+    // click timestamp opens in new window
+    if (selfoss.isSmartphone() == false) {
+        $('.entry-datetime').unbind('click').on('mousedown',function(e) {
+            var entry = $(this).parents('.entry');
+            entry.find('.entry-title').click();
+            entry.find('.entry-title').click();
         });
     }
 
