@@ -18,7 +18,7 @@ class Rss extends BaseController {
      * @return void
      */
     public function rss() {
-        $this->needsLoggedInOrPublicMode();
+        $this->needsLoggedInOrPublicModeOrSecret();
 
         $feedWriter = new RSS2();
         $feedWriter->setTitle(\F3::get('rss_title'));

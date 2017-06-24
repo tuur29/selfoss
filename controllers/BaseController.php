@@ -23,6 +23,18 @@ class BaseController {
     }
 
     /**
+     * send 403 if not logged in and not public mode and secret is not enabled
+     *
+     * @return void
+     */
+    public function needsLoggedInOrPublicModeOrSecret() {
+        if ( \F3::get('auth')->isLoggedin() !== true && \F3::get('public') != 1 ) {
+            if ( ( \F3::get('secret') == 1 && \F3::get('password') !== $_GET['secret'] ) || \F3::get('secret') != 1 )
+                \F3::error(403);
+        }
+    }
+
+    /**
      * send 403 if not logged in and not public mode
      *
      * @return void
