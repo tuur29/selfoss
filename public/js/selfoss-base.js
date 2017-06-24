@@ -424,6 +424,9 @@ var selfoss = {
      * Mark all visible items as read
      */
     markVisibleRead: function () {
+        if ( !window.confirm("Are you sure you want to mark all as read?") )
+            return;
+
         var ids = new Array();
         $('.entry.unread').each(function(index, item) {
             ids.push( $(item).attr('id').substr(5) );
