@@ -66,11 +66,11 @@ class Rss extends BaseController {
                 }
             }
 
-            $newItem->setTitle($this->sanitizeTitle($item['title'] . ' (' . $lastSourceName . ')'));
+            $newItem->setTitle($this->sanitizeTitle($item['title']));
             @$newItem->setLink($item['link']);
             @$newItem->setId($item['link']);
             $newItem->setDate($item['datetime']);
-            $newItem->setDescription(str_replace('&#34;', '"', $item['content']));
+            $newItem->setDescription($lastSourceName . " - " . $item['tags']);
 
             // add tags in category node
             $itemsTags = explode(',', $item['tags']);
