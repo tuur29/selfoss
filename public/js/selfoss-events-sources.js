@@ -24,6 +24,7 @@ selfoss.events.sources = function() {
             success: function(response) {
                 $('.source-opml').after(response);
                 selfoss.events.sources();
+                $(".source-new .source-spout").val("spouts_rss_feed").trigger("change");
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 parent.find('.source-edit-delete').removeClass('loading');                     
