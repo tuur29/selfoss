@@ -231,14 +231,13 @@ class ContentLoader {
     protected function filter($source, $title, $content) {
         if (strlen(trim($source['filter'])) != 0) {
             $resultTitle = @preg_match($source['filter'], $title);
-            $resultContent = @preg_match($source['filter'], $content);
-            if ($resultTitle === false || $resultContent === false) {
+            if ($resultTitle === false) {
                 \F3::get('logger')->error('filter error: ' . $source['filter']);
 
                 return true; // do not filter out item
             }
             // test filter
-            if ($resultTitle == 0 && $resultContent == 0) {
+            if ($resultTitle == 0) {
                 return false;
             }
         }
