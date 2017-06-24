@@ -88,9 +88,6 @@ var selfoss = {
             // init FancyBox
             selfoss.initFancyBox();
 
-            // init shortcut handler
-            selfoss.shortcuts.init();
-
             // setup periodic stats reloader
             window.setInterval(selfoss.dbOnline.sync, 60*1000);
 
