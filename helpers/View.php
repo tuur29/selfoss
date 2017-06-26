@@ -195,6 +195,7 @@ class View {
 
         // build if needed
         if (!file_exists($target) || filemtime($target) < self::$staticmtime[$type]) {
+            ini_set('max_execution_time', 300);
             $minified = '';
             foreach (\F3::get($type) as $file) {
                 if ($type == self::STATIC_RESOURCE_JS) {
