@@ -93,10 +93,6 @@ var selfoss = {
 
             window.setInterval(selfoss.ui.refreshEntryDatetimes, 60*1000);
 
-            window.setTimeout( function() {
-                window.location.reload();
-            }, 1000*60*30);
-
             selfoss.ui.showMainUi();
         }
     },
