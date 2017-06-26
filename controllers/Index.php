@@ -28,6 +28,15 @@ class Index extends BaseController {
             $options = $_GET;
         }
 
+        // secret login
+        $nosecretlogin = true;
+        if ( \F3::get('secret') == 1 && \F3::get('password') == $_GET['secret'] ) {
+            \F3::get('auth')->loginWithoutUser();
+            $_SESSION['loggedin'] = true;
+            setcookie("onlineSession", "true", time()+(3600*24*10), dirname($_SERVER['REQUEST_URI']).'/'  );
+            $nosecretlogin = false;
+        }
+
         if (!isset($options['ajax'])) {
             // show as full html page
             $this->view->publicMode = \F3::get('public') == 1;
