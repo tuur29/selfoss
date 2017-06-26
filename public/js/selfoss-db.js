@@ -64,7 +64,7 @@ selfoss.dbOnline = {
 
                     if( selfoss.filter.type == 'unread' &&
                         data.stats.unread > $('.entry.unread').length )
-                        $('.stream-more').show();
+                        selfoss.dbOnline.reloadList();
                 }
                 selfoss.lastUpdate = dataDate;
             },
