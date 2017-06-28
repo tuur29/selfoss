@@ -167,11 +167,16 @@ selfoss.events.entries = function(e) {
         $('.entry-icon').unbind('click').on('click',function(e){
             e.preventDefault();
             var entry = $(this).parents('.entry');
-            if (entry.hasClass("unread")) {
+            var open = entry.find('.entry-toolbar').first().is(':visible');
+            var unread = entry.hasClass("unread");
+
+            if (!open)
                 entry.find('.entry-title').click();
-                entry.find('.entry-title').click();
-            } else
+
+            if (!unread)
                 entry.find('.entry-toolbar .entry-unread').click();
+
+            entry.find('.entry-title').click();
         });
     }
 
