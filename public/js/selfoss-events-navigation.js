@@ -208,5 +208,8 @@ selfoss.events.navigation = function() {
         
         // logout
         $('#nav-logout').unbind('click').click(selfoss.logout);
+        
+        // logo click reload
+        $('#nav-logo').unbind('click').click(function(){ window.location.reload(); });
     }
 };
