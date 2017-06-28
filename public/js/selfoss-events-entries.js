@@ -167,8 +167,11 @@ selfoss.events.entries = function(e) {
         $('.entry-icon').unbind('click').on('click',function(e){
             e.preventDefault();
             var entry = $(this).parents('.entry');
-            entry.find('.entry-toolbar .entry-unread').click();
-            entry.find('.entry-title').click();
+            if (entry.hasClass("unread")) {
+                entry.find('.entry-title').click();
+                entry.find('.entry-title').click();
+            } else
+                entry.find('.entry-toolbar .entry-unread').click();
         });
     }
 
