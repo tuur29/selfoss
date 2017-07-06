@@ -45,12 +45,6 @@
 
     <span class="entry-separator">&bull;</span>
 
-    <!-- author -->
-    <?php if (!empty($author)) : ?>
-    <span class="entry-author"><?= $author; ?></span>
-    <span class="entry-separator">&bull;</span>
-    <?php endif; ?>
-
     <!-- datetime -->
     <a href="<?= \helpers\Anonymizer::anonymize($this->item['link']); ?>" class="entry-datetime" target="_blank" rel="noopener noreferrer"></a>
 
