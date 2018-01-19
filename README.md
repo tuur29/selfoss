@@ -6,6 +6,20 @@ https://selfoss.aditu.de
 Licensed under the GPLv3 license  
 Version 2.18-SNAPSHOT
 
+EDITS
+--------
+* Brown theme & generic logo's
+* Login with secret url
+* Filtering only based on title
+* Automatic reloading + clickable logo
+* Quickly toggle read status by clicking icon
+* No keyboard shortcuts!
+* Default Spout is RSS feeds
+* Spout for RSS feeds that require cookies
+* Spout for parsing HTML pages with XPath
+
+See all commits [here](https://github.com/tuur29/selfoss/commits?author=tuur29)
+
 DOWNLOAD
 --------
 
