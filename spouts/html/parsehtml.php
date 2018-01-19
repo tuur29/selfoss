@@ -75,6 +75,9 @@ class parsehtml extends \spouts\spout {
             $content = @file_get_contents($this->htmlUrl);
         }
 
+        if (empty($content))
+            throw new \Exception("Empty or non-existant page!");
+
         $dom = new \DOMDocument();
         @$dom->loadHTML($content);
         if (!$dom) {
@@ -92,6 +95,9 @@ class parsehtml extends \spouts\spout {
             $timestampNodes = $xpath->query($params['timestampselector']);
 
         // validation
+        if ($titleNodes->length < 1)
+            throw new \Exception("Cannot find any posts with current title selector");
+
         if (isset($linkNodes) && $titleNodes->length != $linkNodes->length )
             throw new \Exception("Selectors don't return an equal amount of items! (titles != links)");
 
