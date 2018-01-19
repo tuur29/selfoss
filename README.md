@@ -11,7 +11,7 @@ DOWNLOAD
 
 * [Stable releases](https://github.com/SSilence/selfoss/releases) – if you just want to use selfoss.
 * [Development builds](https://bintray.com/fossar/selfoss/selfoss-git) ([latest](https://bintray.com/fossar/selfoss/selfoss-git/_latestVersion#files)) – if you want to try unreleased features or bug fixes, or help testing them.
-* [Git-tracked source code](https://github.com/SSilence/selfoss) – if you want to join selfoss development. Some assembly required.
+* [Git-tracked source code](https://github.com/SSilence/selfoss) – if you want to join selfoss development. Some [assembly](#development) required.
 
 INSTALLATION
 ------------
@@ -21,6 +21,8 @@ INSTALLATION
 3. Insert database access data in config.ini (see below -- you don't have to change anything if you want to use sqlite)
 3. You don't have to install the database, it will be created automatically (ensure that your database has enought rights for creating triggers)
 4. Create cronjob for updating feeds and point it to https://yourselfossurl.com/update via wget or curl. You can also execute the cliupdate.php from commandline.
+
+If you obtained selfoss using Git, some more steps will be required. See the [development](#development) section.
 
 For further questions or on any problem use our support forum: https://selfoss.aditu.de/forum/
 
@@ -44,6 +46,8 @@ UPDATE
 6. Clean your browser cache
 7. Insert your current database connection and your individual configuration in config.ini. Important: we change the config.ini and add new options in newer versions. You have to update the config.ini too.
 8. The database will be updated automatically (ensure that your database has enought rights for creating triggers)
+
+If you obtained selfoss using Git, some more steps might be required. See the [development](#development) section.
 
 For further questions or on any problem use our support forum: https://selfoss.aditu.de/forum
 
@@ -76,6 +80,8 @@ Selfoss uses [composer](https://getcomposer.org/) for installing external librar
 For the client side, you will also need JavaScript dependencies installed by calling `npm install` in the `public` directory.
 
 If you want to create a package with all the dependencies bundled, you will additionally require [grunt](https://gruntjs.com/). After installing it, execute `npm install` in the selfoss directory to obtain the required tasks. Then you can run `grunt` command to produce a zipball. As a bonus, you can also use `grunt install` as a shortcut for installing the selfoss dependencies described above.
+
+Every patch is expected to adhere to our coding style, which is checked automatically by Travis. You can install the checkers locally either with your package manager or by calling `utils/install-phars.sh`, and then run the checks using `grunt check` before submitting a pull request.
 
 CREDITS
 -------

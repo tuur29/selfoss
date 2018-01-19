@@ -516,6 +516,7 @@ body * {
         line-height: 1.7em;
         overflow: hidden;
         padding: 0 1em;
+        overflow-wrap: break-word;
     }
     
         .entry-content a {
@@ -523,9 +524,10 @@ body * {
         }
         
         .entry-content img {
-            max-width:99%;
+            max-width: 100%;
+            height: auto;
             display: block;
-            margin: 0 10px 5px 0;
+            margin-bottom: 5px;
         }
         
         .entry-content p {
@@ -553,15 +555,15 @@ body * {
             column-count: 1;
             max-width: 750px;
         }
-        
-        .entry-content pre {
+
+        .entry-content pre, .entry-content table {
             overflow-x: auto;
         }
 
-        .entry-content blockquote {
-            overflow-x: unset;
+        .entry-content table {
+            display: block;
         }
-    
+
         .entry-content p,
         .entry-content ol,
         .entry-content ul,
@@ -584,16 +586,19 @@ body * {
             vertical-align: sub;
         }
 
-    .entry-icon,
-    .entry-icon img {
-        margin-top:3px;
-        display:block;
-        float:left;
-        width:16px;
-        height:16px;
-        text-decoration:none;
+    .entry-icon {
+        float: left;
+        text-decoration: none;
+        margin-right: 0;
     }
-    
+
+    .entry-icon img {
+        display: block;
+        padding: 6px;
+        width: 16px;
+        height: 16px;
+    }
+
     .entry-link {
         display:none;
     }

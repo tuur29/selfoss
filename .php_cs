@@ -17,11 +17,16 @@ $rules = [
     'phpdoc_no_empty_return' => false,
     'phpdoc_summary' => false,
     'trailing_comma_in_multiline_array' => false,
+    'yoda_style' => null,
+    'semicolon_after_instruction' => false,
     // additional rules
     'array_syntax' => ['syntax' => 'short'],
+    'ordered_imports' => true,
     'phpdoc_order' => true,
+    'psr4' => true,
 ];
 
 return PhpCsFixer\Config::create()
     ->setRules($rules)
+    ->setRiskyAllowed(true)
     ->setFinder($finder);

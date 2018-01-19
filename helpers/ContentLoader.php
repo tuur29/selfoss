@@ -86,6 +86,7 @@ class ContentLoader {
         $spout = $spoutLoader->get($source['spout']);
         if ($spout === false) {
             \F3::get('logger')->error('unknown spout: ' . $source['spout']);
+            $this->sourceDao->error($source['id'], 'unknown spout');
 
             return;
         }
@@ -257,12 +258,13 @@ class ContentLoader {
             $content,
             [
                 'safe' => 1,
-                'deny_attribute' => '* -alt -title -src -href -target -width -height, img +width +height',
+                'deny_attribute' => '* -alt -title -src -href -target',
                 'keep_bad' => 0,
                 'comment' => 1,
                 'cdata' => 1,
                 'elements' => 'div,p,ul,li,a,img,dl,dt,dd,h1,h2,h3,h4,h5,h6,ol,br,table,tr,td,blockquote,pre,ins,del,th,thead,tbody,b,i,strong,em,tt,sub,sup,s,strike,code'
-            ]
+            ],
+            'img=width, height'
         );
     }
 
@@ -297,12 +299,16 @@ class ContentLoader {
             $imageHelper = new \helpers\Image();
             $thumbnailAsJpg = $imageHelper->loadImage($thumbnail, $extension, 500, 500);
             if ($thumbnailAsJpg !== false) {
-                file_put_contents(
+                $written = file_put_contents(
                     'data/thumbnails/' . md5($thumbnail) . '.' . $extension,
                     $thumbnailAsJpg
                 );
-                $newItem['thumbnail'] = md5($thumbnail) . '.' . $extension;
-                \F3::get('logger')->debug('thumbnail generated: ' . $thumbnail);
+                if ($written !== false) {
+                    $newItem['thumbnail'] = md5($thumbnail) . '.' . $extension;
+                    \F3::get('logger')->debug('Thumbnail generated: ' . $thumbnail);
+                } else {
+                    \F3::get('logger')->warning('Unable to store thumbnail: ' . $thumbnail . '. Please check permissions of data/thumbnails.');
+                }
             } else {
                 $newItem['thumbnail'] = '';
                 \F3::get('logger')->error('thumbnail generation error: ' . $thumbnail);
@@ -331,13 +337,17 @@ class ContentLoader {
                 $imageHelper = new \helpers\Image();
                 $iconAsPng = $imageHelper->loadImage($icon, $extension, 30, null);
                 if ($iconAsPng !== false) {
-                    file_put_contents(
+                    $written = file_put_contents(
                         'data/favicons/' . md5($icon) . '.' . $extension,
                         $iconAsPng
                     );
-                    $newItem['icon'] = md5($icon) . '.' . $extension;
                     $lasticon = $icon;
-                    \F3::get('logger')->debug('icon generated: ' . $icon);
+                    if ($written !== false) {
+                        $newItem['icon'] = md5($icon) . '.' . $extension;
+                        \F3::get('logger')->debug('Icon generated: ' . $icon);
+                    } else {
+                        \F3::get('logger')->warning('Unable to store icon: ' . $icon . '. Please check permissions of data/favicons.');
+                    }
                 } else {
                     $newItem['icon'] = '';
                     \F3::get('logger')->error('icon generation error: ' . $icon);
@@ -350,41 +360,41 @@ class ContentLoader {
         return $newItem;
     }
 
-     /**
-      * Obtain title for given data
-      *
-      * @param $data
-      */
-     public function fetchTitle($data) {
-         \F3::get('logger')->debug('Start fetching spout title');
+    /**
+     * Obtain title for given data
+     *
+     * @param $data
+     */
+    public function fetchTitle($data) {
+        \F3::get('logger')->debug('Start fetching spout title');
 
-         // get spout
-         $spoutLoader = new \helpers\SpoutLoader();
-         $spout = $spoutLoader->get($data['spout']);
+        // get spout
+        $spoutLoader = new \helpers\SpoutLoader();
+        $spout = $spoutLoader->get($data['spout']);
 
-         if ($spout === false) {
-             \F3::get('logger')->error("Unknown spout '{$data['spout']}' when fetching title");
+        if ($spout === false) {
+            \F3::get('logger')->error("Unknown spout '{$data['spout']}' when fetching title");
 
-             return null;
-         }
+            return null;
+        }
 
-         // receive content
-         try {
-             @set_time_limit(5000);
-             @error_reporting(E_ERROR);
+        // receive content
+        try {
+            @set_time_limit(5000);
+            @error_reporting(E_ERROR);
 
-             $spout->load($data);
-         } catch (\Exception $e) {
-             \F3::get('logger')->error('Error fetching title', ['exception' => $e]);
+            $spout->load($data);
+        } catch (\Exception $e) {
+            \F3::get('logger')->error('Error fetching title', ['exception' => $e]);
 
-             return null;
-         }
+            return null;
+        }
 
-         $title = $spout->getSpoutTitle();
-         $spout->destroy();
+        $title = $spout->getSpoutTitle();
+        $spout->destroy();
 
-         return $title;
-     }
+        return $title;
+    }
 
     /**
      * clean up messages, thumbnails etc.
