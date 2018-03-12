@@ -23,8 +23,10 @@ class Authentication {
 
         $base_url = parse_url(\helpers\View::getBaseUrl());
 
+        ini_set('session.gc_maxlifetime', 3600*24*14);
+
         // session cookie will be valid for one month.
-        $cookie_expire = 3600 * 24 * 30;
+        $cookie_expire = 3600 * 24 * 14;
         $cookie_secure = $base_url['scheme'] == 'https';
         $cookie_httponly = true;
         $cookie_path = $base_url['path'];
