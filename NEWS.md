@@ -1,5 +1,36 @@
 # selfoss news
-## 2.18 – Unreleased
+## 2.19 – unreleased
+### New features
+- Thumbnails can be disabled ([#897](https://github.com/SSilence/selfoss/pull/897))
+- Reddit spout replaced fragile imgur heuristics with previews provided by the JSON API ([#1033](https://github.com/SSilence/selfoss/pull/1033))
+
+### Bug fixes
+- Reddit spout allows wider range of URLs, including absolute URLs and searches ([#1033](https://github.com/SSilence/selfoss/pull/1033))
+
+### API changes
+- `tags` attribute is now consistently array of strings, numbers are numbers and booleans are booleans.
+
+### Customization changes
+- `selfoss.shares.register` changed its signature: it no longer takes a boolean argument, and the callback is expected to open a window itself, instead of returning a URL. For example, if you previously had
+  ```javascript
+  selfoss.shares.register('moo', 'm', true, function(url, title) {
+      return 'http://moo.foobar/share?u=' + encodeURIComponent(url) + '&t=' + encodeURIComponent(title);
+  });
+  ```
+
+  in your `user.js` file, you will need to change it to
+
+  ```javascript
+  selfoss.shares.register('moo', 'm', function(url, title) {
+      window.open('http://moo.foobar/share?u=' + encodeURIComponent(url) + '&t=' + encodeURIComponent(title));
+  });
+  ```
+
+### Other changes
+- Removed broken instapaper scraping from Reddit spout ([#1033](https://github.com/SSilence/selfoss/pull/1033))
+
+
+## 2.18 – 2018-03-05
 ### New features
 - Full-text RSS spout is now able to extract content from PDFs ([#897](https://github.com/SSilence/selfoss/pull/897))
 - URL is no longer cleaned when changing spout ([#906](https://github.com/SSilence/selfoss/pull/906))

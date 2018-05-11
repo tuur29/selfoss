@@ -57,6 +57,7 @@ selfoss.events.sources = function() {
 
         // get values and params
         var values = selfoss.getValues(parent);
+        values['tags'] = values['tags'].split(',');
         values['ajax'] = true;
 
         $.ajax({
