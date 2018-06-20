@@ -9,6 +9,7 @@ namespace spouts\html;
  * @license    GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
  * @author     Tobias Zeising <tobias.zeising@aditu.de>
  * @author     Daniel Seither <post@tiwoc.de>
+ * @author     Tuur Lievens
  */
 class parsehtml extends \spouts\spout {
     /** @var string name of spout */
@@ -55,8 +56,23 @@ class parsehtml extends \spouts\spout {
             'type' => 'text',
             'default' => '//article//p[@class=\'timestamp\']',
             'required' => false
+        ],
+        'cookies' => [
+            'title' => 'Cookies (optional)',
+            'type' => 'text',
+            'default' => '',
+            'required' => false
         ]
     ];
+
+    /** @var array|bool current fetched items */
+    protected $items = false;
+
+    /** @var string URL of the source */
+    protected $htmlUrl = '';
+
+    /** @var string URL of the favicon */
+    protected $faviconUrl = null;
 
     /**
      * loads content for given source
@@ -70,7 +86,7 @@ class parsehtml extends \spouts\spout {
         $this->htmlUrl = $params['url'];
 
         if (function_exists('curl_init') && !ini_get('open_basedir')) {
-            $content = $this->file_get_contents_curl($this->htmlUrl);
+            $content = $this->file_get_contents_curl($this->htmlUrl, $params);
         } else {
             $content = @file_get_contents($this->htmlUrl);
         }
@@ -250,13 +266,21 @@ class parsehtml extends \spouts\spout {
      * @return string icon url
      */
     public function getIcon() {
-        if ($this->faviconUrl !== null)
+        if ($this->faviconUrl !== null) {
             return $this->faviconUrl;
+        }
 
-        $imageHelper = $this->getImageHelper();
-        $htmlUrl = $this->getHtmlUrl();
-        if ($htmlUrl && $imageHelper->fetchFavicon($htmlUrl))
-            $this->faviconUrl = $imageHelper->getFaviconUrl();
+        try {
+            $this->faviconUrl = false;
+            $imageHelper = $this->getImageHelper();
+            $htmlUrl = $this->getHtmlUrl();
+            if ($htmlUrl && $imageHelper->fetchFavicon($htmlUrl, true)) {
+                $this->faviconUrl = $imageHelper->getFaviconUrl();
+                \F3::get('logger')->debug('icon: using feed homepage favicon: ' . $this->faviconUrl);
+            }
+        } catch (\Exception $e) {
+            \F3::get('logger')->debug('icon: error', ['exception' => $e]);
+        }
 
         return $this->faviconUrl;
     }
@@ -327,8 +351,16 @@ class parsehtml extends \spouts\spout {
 
     // HELPERS
 
-    private function file_get_contents_curl($url) {
+    private function file_get_contents_curl($url, $params) {
         $ch = curl_init();
+
+        // some sites need a user-agent
+        $agent= 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36';
+        curl_setopt($ch, CURLOPT_USERAGENT, $agent);
+
+        if (!empty($params['cookies']))
+            curl_setopt($ch, CURLOPT_COOKIE, $params['cookies']);
+
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
