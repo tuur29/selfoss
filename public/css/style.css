@@ -8,7 +8,7 @@ html {
 body {
     font: lighter 18px/27px 'OpenSans', Arial, sans-serif;
     color: black;
-    background-color: #efefef;
+    background:url(images/bg.gif) repeat;
     height: 100%;
     position:relative;
 }
@@ -64,7 +64,7 @@ body * {
 
 #nav {
     background:#191718;
-    border-right:5px solid #7C3B00;
+    border-right:5px solid #3d6d69;
     z-index:10;
     overflow-x:hidden;
 }
@@ -77,13 +77,9 @@ body * {
     #nav-logo {
         margin-left:20px;
         margin-top:14px;
-        background:url(images/logo.png) no-repeat;
+        background:url(images/logo.png);
         width:31px;
         height:37px;
-        cursor:pointer;
-        color:#ffffff;
-        padding-top:7px;
-        padding-left: 45px;
     }
     
     #nav-mark {
@@ -93,7 +89,7 @@ body * {
         margin-left:15px;
         margin-right:15px;
         color:#d7d7d7;
-        background:#7C3B00;
+        background:#3d6d69;
         font-size:0.9em;
         text-align:center;
         border-radius:2px;
@@ -101,7 +97,7 @@ body * {
     }
     
         #nav-mark:hover {
-            color:#ffffff;
+            color:#000000;
         }
 
     #nav-filter-wrapper  {
@@ -343,7 +339,7 @@ body * {
     top:25px;
     width:330px;
     padding:5px;
-    background:rgba(124 ,59 ,0, 0.7);
+    background:rgba(61, 109, 105, 0.4);
     
     -webkit-border-top-right-radius: 4px;
     -webkit-border-bottom-right-radius: 4px;
@@ -399,8 +395,8 @@ body * {
         padding-left:5px;
         padding-right:15px;
         font-size:0.85em;
-        background: url(images/remove-small.png) no-repeat right center #7C3B00;
-        border-right:6px solid #7C3B00;
+        background: url(images/remove-small.png) no-repeat right center #3d6d69;
+        border-right:6px solid #3d6d69;
         -webkit-border-top-right-radius: 4px;
         -webkit-border-bottom-right-radius: 4px;
         -moz-border-radius-topright: 4px;
@@ -433,10 +429,10 @@ body * {
 
 .entry ,
 .source {
-    margin:5px 20px 3px 20px;
+    margin:1px 50px 3px 5px; 
     padding:5px; 
     border-radius:4px;
-    background:rgba(255, 255, 255, 0.7);
+    background:rgba(255, 255, 255, 0.4);
     position:relative;
     font-weight:normal;
     font-size:0.9em;
@@ -445,8 +441,8 @@ body * {
 
     .entry.selected.unread,
     .entry.unread {
-        margin-left: 10px;
-        border-left:3px solid #191718;
+        margin-left: 3px;
+        border-left:3px solid #5f9490;
     }
 
     .entry.selected {
@@ -455,7 +451,7 @@ body * {
 
     .entry .found {
         color:#fff;
-        background:rgba(124 ,59 ,0, 0.7);
+        background:rgba(61, 109, 105, 0.4);
     }
 
     .entry-icon,
@@ -520,7 +516,7 @@ body * {
     }
     
         .entry-content a {
-            color:#7C3B00;
+            color:#3d6d69;
         }
         
         .entry-content img {
@@ -891,7 +887,7 @@ body * {
 }
 
     #login h1 {
-        background:url(images/logo-inv.png) left center no-repeat;
+        background:url(images/logo.png) left center no-repeat;
         font-weight:600;
         padding-top:10px;
         padding-left:40px;
@@ -1107,9 +1103,9 @@ body.authenabled.loggedin #nav-logout {
         #search-button {
             top:42px;
             left:100%;
-            margin-left:-60px;
+            margin-left:-50px;
             padding:10px;
-            background-color:rgba(124 ,59 ,0, 0.7);
+            background-color:rgba(61, 109, 105, 0.4);
             -webkit-border-bottom-left-radius: 4px;
             -webkit-border-bottom-right-radius: 4px;
             -moz-border-radius-bottomleft: 4px;
@@ -1144,7 +1140,7 @@ body.authenabled.loggedin #nav-logout {
     
     .entry.selected.unread,
     .entry.unread {
-        border-right:5px solid #191718;
+        border-right:5px solid #5f9490;
         border-left:0;
     }
     
@@ -1178,7 +1174,7 @@ body.authenabled.loggedin #nav-logout {
         position:relative;
         display:block;
         background:#191718;
-        border-bottom:3px solid #7C3B00;
+        border-bottom:3px solid #3d6d69;
         width:100%;
         height:50px;
     }
@@ -1190,10 +1186,8 @@ body.authenabled.loggedin #nav-logout {
             left:50%;
             top:5px;
             margin-left:-48px;
+            background:url(images/nav-mobile-logo.png) no-repeat;
             background-size:96px 40px;
-            color:#ffffff;
-            padding-top: 5px;
-            text-align:center
         }
 
         #nav-mobile-logo span {
@@ -1224,7 +1218,7 @@ body.authenabled.loggedin #nav-logout {
         border:0;
         overflow:hidden;
         clear:both;
-        border-bottom:3px solid #7C3B00;
+        border-bottom:3px solid #3d6d69;
     }
         
 		#nav-mark {
@@ -1308,7 +1302,7 @@ body.authenabled.loggedin #nav-logout {
         .entry-source,
         .entry-separator,
         .entry-datetime {
-            color:#7C3B00;
+            color:#3d6d69;
         }
 
         .source-showparams,

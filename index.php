@@ -26,6 +26,9 @@ $css = $clientPackage->extra->requiredFiles->css;
 if (file_exists('user.css')) {
     $css[] = 'user.css';
 }
+if (file_exists('public/css/theme.css')) {
+    $css[] = 'public/css/theme.css';
+}
 $f3->set('css', $css);
 
 // define routes
