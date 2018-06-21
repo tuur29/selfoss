@@ -12,6 +12,10 @@ select, input {
     border-color: #333;
 }
 
+.sp-container {
+	background: #333;
+}
+
 .entry.selected.unread, .entry.unread {
 	border-left-color: #777;
 }
