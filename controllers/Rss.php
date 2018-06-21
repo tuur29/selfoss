@@ -73,8 +73,7 @@ class Rss extends BaseController {
             $newItem->setDescription($lastSourceName . " - " . $item['tags']);
 
             // add tags in category node
-            $itemsTags = explode(',', $item['tags']);
-            foreach ($itemsTags as $tag) {
+            foreach ($item['tags'] as $tag) {
                 $tag = trim($tag);
                 if (strlen($tag) > 0) {
                     $newItem->addElement('category', $tag);
