@@ -1,0 +1,43 @@
+
+body {
+    background: #222;
+    color: #fff;
+}
+
+.refresh-source, .source-add {
+    color: #fff;
+}
+
+select, input {
+    border-color: #333;
+}
+
+.entry.selected.unread, .entry.unread {
+	border-left-color: #777;
+}
+
+.entry.selected {
+	border-color: #777;
+}
+
+.entry, .source {
+	background: #2a2a2a
+}
+
+.entry.unread .entry-title, .source-title {
+	color: #ccc;
+}
+
+.entry-toolbar {
+	background: #222;
+	border-color: #777;
+}
+
+.entry-smartphone-share button, .entry-toolbar button {
+	filter: invert(100%) grayscale(100%);
+}
+
+.entry-tags-tag {
+    opacity: 0.75;
+    color: #fff;
+}

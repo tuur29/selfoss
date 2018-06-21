@@ -48,7 +48,9 @@
         <link rel="stylesheet" href="css/fonts.css" />
     <?php endif; ?>
     <link rel="stylesheet" href="<?= \helpers\View::getGlobalCssFileName(); ?>" />
-
+    <?php if (\F3::get('darkmode') == true) : ?>
+        <link rel="stylesheet" href="<?= \helpers\View::getBaseUrl(); ?>public/dark.css?v=<?= \helpers\View::$staticmtime[self::STATIC_RESOURCE_CSS] ?>" />
+    <?php endif; ?>
 </head>
 <body class="
     <?= $this->publicMode === true ? 'publicmode' : ''; ?>
