@@ -62,6 +62,12 @@ class parsehtml extends \spouts\spout {
             'type' => 'text',
             'default' => '',
             'required' => false
+        ],
+        'proxy' => [
+            'title' => 'SOCKS5 Proxy (optional, user:pass ; ip:port)',
+            'type' => 'text',
+            'default' => '',
+            'required' => false
         ]
     ];
 
@@ -92,7 +98,7 @@ class parsehtml extends \spouts\spout {
         }
 
         if (empty($content))
-            throw new \Exception("Empty or non-existant page!");
+            throw new \Exception("Empty or non-existant page! (Might also be a proxy error)");
 
         $dom = new \DOMDocument();
         @$dom->loadHTML($content);
@@ -359,8 +365,16 @@ class parsehtml extends \spouts\spout {
         curl_setopt($ch, CURLOPT_USERAGENT, $agent);
 
         if (!empty($params['cookies']))
-            curl_setopt($ch, CURLOPT_COOKIE, $params['cookies']);
+        curl_setopt($ch, CURLOPT_COOKIE, $params['cookies']);
+        
+        if (!empty($params['proxy'])) {
+            $temp = explode(" ; ", $params['proxy']); // 0: user:pass, 1: url
+            curl_setopt($ch, CURLOPT_PROXY, $temp[1]);
+            curl_setopt($ch, CURLOPT_PROXYUSERPWD, $temp[0]);
+            curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+        }
 
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
