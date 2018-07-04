@@ -70,7 +70,7 @@ class Rss extends BaseController {
             @$newItem->setLink($item['link']);
             @$newItem->setId($item['link']);
             $newItem->setDate($item['datetime']);
-            $newItem->setDescription($lastSourceName . " - " . $item['tags']);
+            $newItem->setDescription($lastSourceName . " - " . implode(" ,",$item['tags']));
 
             // add tags in category node
             foreach ($item['tags'] as $tag) {
