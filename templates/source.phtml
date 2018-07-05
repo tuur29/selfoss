@@ -79,6 +79,17 @@
         ?>
         </li>
 
+        <!-- Update timestamp -->
+        <?php if (isset($this->source) && isset($this->source['lastupdate'])) : ?>
+        <li class="source-lastupdate">
+            <?php 
+                $date = new DateTime();
+                $date->setTimestamp($this->source['lastupdate']);
+                echo "<br><i>Last update: ". $date->format('Y-m-d H:i:s') . "</i><br>";
+            ?>
+        </li>
+        <?php endif; ?>
+
         <!-- error messages -->
         <?php if (isset($this->source) && isset($this->source['error'])) : ?>
         <li class="source-error">
