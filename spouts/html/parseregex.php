@@ -68,6 +68,12 @@ class parseregex extends \spouts\spout {
             'type' => 'text',
             'default' => '',
             'required' => false
+        ],
+        'baseurl' => [
+            'title' => 'Base url (optional, linkselector match gets appended)',
+            'type' => 'text',
+            'default' => '',
+            'required' => false
         ]
     ];
 
@@ -109,6 +115,10 @@ class parseregex extends \spouts\spout {
         if (!empty($params['timestampselector']))
             preg_match_all($params['timestampselector'], $content, $timestampNodes);
 
+        // \F3::get('logger')->debug('regex '.$params['titleselector']);
+        // \F3::get('logger')->debug('regex '.$params['linkselector']);
+        // \F3::get('logger')->debug('regex '.$params['timestampselector']);
+        // \F3::get('logger')->debug('content '.$content);
 
         // validation
         if (empty($titleNodes))
@@ -125,13 +135,22 @@ class parseregex extends \spouts\spout {
 
         // parse and add items
         $array = array();
-        for ($i=0; $i < sizeof($titleNodes); $i++)
+        for ($i=0; $i < sizeof($titleNodes[1]); $i++) {
+
+            // prepend link
+            $link = isset($linkNodes) ? $linkNodes[1][$i] : '';
+            if (!empty($params['baseurl']))
+                $link = $params['baseurl'] . $link;
+
             $array[$i] = [
                 'title' => $titleNodes[1][$i],
-                'link' => isset($linkNodes) ? $linkNodes[1][$i] : '',
+                'link' => $link,
                 'content' => isset($contentNodes) ? $contentNodes[1][$i] : '',
                 'timestamp' => isset($timestampNodes) ? $timestampNodes[1][$i] : ''
             ];
+
+            \F3::get('logger')->debug('regex '. print_r($array[$i], true));
+        }
 
         $this->items = $array;
     }

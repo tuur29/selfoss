@@ -68,6 +68,12 @@ class parsehtml extends \spouts\spout {
             'type' => 'text',
             'default' => '',
             'required' => false
+        ],
+        'baseurl' => [
+            'title' => 'Base url (optional, linkselector match gets appended)',
+            'type' => 'text',
+            'default' => '',
+            'required' => false
         ]
     ];
 
@@ -131,13 +137,20 @@ class parsehtml extends \spouts\spout {
 
         // parse and add items
         $array = array();
-        for ($i=0; $i < $titleNodes->length; $i++)
+        for ($i=0; $i < $titleNodes->length; $i++) {
+
+            // prepend link
+            $link = isset($linkNodes) ? $linkNodes[$i]->getAttribute('href') : "";
+            if (!empty($params['baseurl']))
+                $link = $params['baseurl'] . $link;
+
             $array[$i] = [
                 'title' => $titleNodes[$i]->textContent,
-                'link' => isset($linkNodes) ? $linkNodes[$i]->getAttribute('href') : "",
+                'link' => $link,
                 'content' => isset($contentNodes) ? $contentNodes[$i]->C14N() : "",
                 'timestamp' => isset($timestampNodes) ? $timestampNodes[$i]->textContent : ""
             ];
+        }
 
         $this->items = $array;
     }
@@ -373,7 +386,7 @@ class parsehtml extends \spouts\spout {
             curl_setopt($ch, CURLOPT_PROXYUSERPWD, $temp[0]);
             curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
         }
-
+        
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
@@ -382,6 +395,11 @@ class parsehtml extends \spouts\spout {
         $data = @curl_exec($ch);
         curl_close($ch);
 
+        if (!empty($params['cookies']))
+            sleep(0.5);
+
+
+        // \F3::get('logger')->debug('received data: ' . $data);
         return $data;
     }
 }
