@@ -148,6 +148,46 @@ selfoss.events.sources = function() {
         $(this).parent().parent().find('.source-edit-form').show();
     });
 
+    // refresh a specific source
+    $('.source-refresh').unbind('click').click(function() {
+        // get id
+        var parent = $(this).parents('.source');
+        var id = false;
+        if (typeof parent.attr('id') != 'undefined') {
+            id = parent.attr('id').substr(6);
+        }
+
+        // show loading
+        $('#content').addClass('loading');
+
+        $.ajax({
+            url: $('base').attr('href') + 'source/' + id + '/update',
+            type: 'POST',
+            dataType: 'text',
+            data: { ajax: true },
+            success: function() {
+                // refresh sources list
+                $.ajax({
+                    url: $('base').attr('href') + 'sources/sourcesStats',
+                    type: 'GET',
+                    success: function(data) {
+                        selfoss.refreshSources(data.sources);
+                        $('#content').removeClass('loading');
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        selfoss.ui.showError($('#lang').data('error_loading_stats') + ' ' +
+                                             textStatus + ' ' + errorThrown);
+                    }
+                });
+
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $('#content').removeClass('loading');
+                selfoss.ui.showError($('#lang').data('error_refresh_source') + ' ' + errorThrown);
+            }
+        });
+    });
+
     // select new source spout type
     $('.source-spout').unbind('change').change(function() {
         var val = $(this).val();

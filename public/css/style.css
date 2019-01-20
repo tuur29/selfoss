@@ -758,6 +758,7 @@ body * {
         cursor:pointer;
     }
 
+.source-refresh,
 .source-showparams,
 .source-delete,
 .source-save,
