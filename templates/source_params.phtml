@@ -18,7 +18,7 @@ foreach ($this->spout->params as $spoutParamName => $spoutParam) {
                 <label for="' . $spoutParamName . '-' . $this->idAttr . '">' . $spoutParam['title'] . '</label>
                 <input id="' . $spoutParamName . '-' . $this->idAttr . '" type="' . $spoutParam['type'] . '"
                        name="' . $spoutParamName . '"
-                       value="' . $value . '"
+                       value="' . htmlentities($value) . '"
                        ' . $checked . ' />
               </li>';
     }
