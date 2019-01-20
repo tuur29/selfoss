@@ -45,3 +45,37 @@ select, input {
     opacity: 0.75;
     color: #fff;
 }
+
+#content.loading {
+	background: none;
+}
+
+#content.loading::after {
+	background: url(images/ajax-loader-big.gif) center center no-repeat;
+	content: " ";
+	width: 100%;
+	position: fixed;
+	height: 100%;
+	top: 0;
+	left: 0;
+	filter: invert(1);
+}
+
+#loginform.loading {
+    background: none;
+}
+
+#loginform.loading::after {
+	background: url(images/ajax-loader-big.gif) center center no-repeat;
+	content: " ";
+	width: 100%;
+	position: fixed;
+	height: 100%;
+	top: 0;
+	left: 0;
+	filter: invert(1);
+}
+
+.stream-more.loading {
+	filter: invert(1);
+}
