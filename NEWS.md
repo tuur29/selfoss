@@ -6,9 +6,10 @@
 
 ### Bug fixes
 - Reddit spout allows wider range of URLs, including absolute URLs and searches ([#1033](https://github.com/SSilence/selfoss/pull/1033))
+- Improved compatibility with PHP 7.2 ([#1049](https://github.com/SSilence/selfoss/issues/1049))
 
 ### API changes
-- `tags` attribute is now consistently array of strings, numbers are numbers and booleans are booleans.
+- `tags` attribute is now consistently array of strings, numbers are numbers and booleans are booleans. **This might break third-party clients that have not updated yet.** ([#948](https://github.com/SSilence/selfoss/pull/948))
 
 ### Customization changes
 - `selfoss.shares.register` changed its signature: it no longer takes a boolean argument, and the callback is expected to open a window itself, instead of returning a URL. For example, if you previously had
@@ -26,8 +27,11 @@
   });
   ```
 
+  ([#1017](https://github.com/SSilence/selfoss/pull/1017))
+
 ### Other changes
 - Removed broken instapaper scraping from Reddit spout ([#1033](https://github.com/SSilence/selfoss/pull/1033))
+- Open Sans font is no longer bundled and `use_system_font` option was removed. The typeface is still set as the default font family, so if you want to use it, install it to your devices. If you want to use a different typeface, add `body { font-family: 'Foo Face'; }` to your `custom.css`.
 
 
 ## 2.18 – 2018-03-05
