@@ -731,6 +731,14 @@ body * {
     width:60%;
 }
 
+.source-disabled:not(.source-new) {
+    opacity: 0.5;
+}
+
+.source-enabled {
+    opacity: 1;
+}
+
 .source-title {
     display:inline;
     color:#333333;

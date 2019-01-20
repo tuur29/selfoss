@@ -105,7 +105,8 @@ class Database {
                         params      TEXT NOT NULL,
                         error       TEXT,
                         lastupdate  INTEGER,
-                		lastentry   INTEGER
+                		lastentry   INTEGER,
+                		enabled     INTEGER
                     );
                 ');
                 $isNewestSourcesTable = true;

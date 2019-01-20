@@ -89,7 +89,8 @@ class Database {
                         filter      TEXT,
                         error       TEXT,
                         lastupdate  INTEGER,
-                		lastentry   INTEGER
+                		lastentry   INTEGER,
+                		enabled     INTEGER
                     );
                 ');
                 $isNewestSourcesTable = true;

@@ -98,7 +98,8 @@ class Database {
                         filter TEXT,
                         error TEXT,
                         lastupdate INT,
-                		lastentry INT
+                		lastentry INT,
+                		enabled INT,
                     ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
                 ');
                 $isNewestSourcesTable = true;

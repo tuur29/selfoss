@@ -1,6 +1,6 @@
 <?php $idAttr = isset($this->source) ? $this->source['id'] : 'new-' . rand(); ?>
 <div role="form" id="source<?= $idAttr ?>"
-        class="source <?= isset($this->source) === false ? 'source-new' : '' ?> <?= (isset($this->source) && isset($this->source['error']) && strlen($this->source['error']) > 0) ? 'error' : '' ?>">
+        class="source <?= isset($this->source) === false ? 'source-new' : '' ?> <?= (isset($this->source) && isset($this->source['error']) && strlen($this->source['error']) > 0) ? 'error' : '' ?> <?= ($this->source['enabled'] ? "source-enabled" : "source-disabled") ?>">
     <div class="source-icon">
         <?php if (isset($this->source) && isset($this->source['icon']) && $this->source['icon'] !== false && $this->source['icon'] != '0') : ?>
         <img src="<?= 'favicons/' . $this->source['icon']; ?>" alt="" />
@@ -63,6 +63,14 @@
                     <?= $spout->name; ?>
                 </option>
                 <?php endforeach; ?>
+            </select>
+        </li>
+
+        <!-- Enabled -->
+        <li><label for="enabled-<?= $idAttr ?>"><?= \F3::get('lang_source_enabled')?></label>
+            <select id="enabled-<?= $idAttr ?>" name="enabled">
+                <option value="1"><?= \F3::get('lang_source_enabled')?></option>
+                <option value="0"><?= \F3::get('lang_source_disabled')?></option>
             </select>
         </li>
 

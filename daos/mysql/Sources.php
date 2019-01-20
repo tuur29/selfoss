@@ -20,12 +20,13 @@ class Sources extends Database {
      *
      * @return int new id
      */
-    public function add($title, array $tags, $filter, $spout, $params) {
-        return $this->stmt->insert('INSERT INTO ' . \F3::get('db_prefix') . 'sources (title, tags, filter, spout, params) VALUES (:title, :tags, :filter, :spout, :params)', [
+    public function add($title, array $tags, $filter, $spout, $params, $enabled) {
+        return $this->stmt->insert('INSERT INTO ' . \F3::get('db_prefix') . 'sources (title, tags, filter, spout, params, enabled) VALUES (:title, :tags, :filter, :spout, :params, :enabled)', [
             ':title' => trim($title),
             ':tags' => $this->stmt->csvRow($tags),
             ':filter' => $filter,
             ':spout' => $spout,
+            ':enabled' => $enabled,
             ':params' => htmlentities(json_encode($params))
         ]);
     }
@@ -41,12 +42,13 @@ class Sources extends Database {
      *
      * @return void
      */
-    public function edit($id, $title, array $tags, $filter, $spout, $params) {
-        \F3::get('db')->exec('UPDATE ' . \F3::get('db_prefix') . 'sources SET title=:title, tags=:tags, filter=:filter, spout=:spout, params=:params WHERE id=:id', [
+    public function edit($id, $title, array $tags, $filter, $spout, $params, $enabled) {
+        \F3::get('db')->exec('UPDATE ' . \F3::get('db_prefix') . 'sources SET title=:title, tags=:tags, filter=:filter, spout=:spout, params=:params, enabled=:enabled WHERE id=:id', [
             ':title' => trim($title),
             ':tags' => $this->stmt->csvRow($tags),
             ':filter' => $filter,
             ':spout' => $spout,
+            ':enabled' => $enabled,
             ':params' => htmlentities(json_encode($params)),
             ':id' => $id
         ]);
@@ -121,7 +123,7 @@ class Sources extends Database {
      * @return mixed all sources
      */
     public function getByLastUpdate() {
-        $ret = \F3::get('db')->exec('SELECT id, title, tags, spout, params, filter, error, lastupdate, lastentry FROM ' . \F3::get('db_prefix') . 'sources ORDER BY lastupdate ASC');
+        $ret = \F3::get('db')->exec('SELECT id, title, tags, spout, params, filter, error, lastupdate, lastentry, enabled FROM ' . \F3::get('db_prefix') . 'sources ORDER BY lastupdate ASC');
 
         return $ret;
     }
@@ -137,7 +139,7 @@ class Sources extends Database {
     public function get($id = null) {
         // select source by id if specified or return all sources
         if (isset($id)) {
-            $ret = \F3::get('db')->exec('SELECT id, title, tags, spout, params, filter, error FROM ' . \F3::get('db_prefix') . 'sources WHERE id=:id', [':id' => $id]);
+            $ret = \F3::get('db')->exec('SELECT id, title, tags, spout, params, filter, error, enabled FROM ' . \F3::get('db_prefix') . 'sources WHERE id=:id', [':id' => $id]);
             $ret = $this->stmt->ensureRowTypes($ret, ['id' => \daos\PARAM_INT]);
             if (isset($ret[0])) {
                 $ret = $ret[0];
@@ -145,7 +147,7 @@ class Sources extends Database {
                 $ret = false;
             }
         } else {
-            $ret = \F3::get('db')->exec('SELECT id, title, tags, spout, params, filter, error FROM ' . \F3::get('db_prefix') . 'sources ORDER BY error DESC, lower(title) ASC');
+            $ret = \F3::get('db')->exec('SELECT id, title, tags, spout, params, filter, error, enabled FROM ' . \F3::get('db_prefix') . 'sources ORDER BY error DESC, lower(title) ASC');
             $ret = $this->stmt->ensureRowTypes($ret, [
                 'id' => \daos\PARAM_INT,
                 'tags' => \daos\PARAM_CSV
@@ -182,7 +184,7 @@ class Sources extends Database {
      */
     public function getWithIcon() {
         $ret = \F3::get('db')->exec('SELECT
-                sources.id, sources.title, sources.tags, sources.spout,
+                sources.id, sources.title, sources.tags, sources.spout, sources.enabled,
                 sources.params, sources.filter, sources.error, sources.lastentry, sources.lastupdate,
                 sourceicons.icon AS icon
             FROM ' . \F3::get('db_prefix') . 'sources AS sources

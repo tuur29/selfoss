@@ -83,6 +83,15 @@ selfoss.events.sources = function() {
                 parent.find('.source-title').text(title);
                 parent.find("input[name='title']").val(title);
 
+                // update enabled state
+                if (response.enabled == "0") {
+                    parent.removeClass('source-enabled');
+                    parent.addClass('source-disabled');
+                } else {
+                    parent.removeClass('source-disabled');
+                    parent.addClass('source-enabled');
+                }
+
                 // show all links for new items
                 parent.removeClass('source-new');
 
@@ -230,4 +239,16 @@ selfoss.events.sources = function() {
             }
         });
     });
+
+    // quick toggle enabled a source with icon
+    $('.source-icon').unbind('click').click(function() {
+        var state = $(this).parent().find('[name=enabled]').val();
+        if (state==1) {
+            $(this).parent().find('[name=enabled]').val(0)
+        } else {
+            $(this).parent().find('[name=enabled]').val(1)
+        }
+        $(this).parent().find('.source-save').click();
+    });
+
 };

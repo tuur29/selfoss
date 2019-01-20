@@ -157,12 +157,14 @@ class Sources extends BaseController {
         $spout = $data['spout'];
         $filter = $data['filter'];
         $isAjax = isset($data['ajax']);
+        $enabled = $data['enabled'];
 
         unset($data['title']);
         unset($data['spout']);
         unset($data['filter']);
         unset($data['tags']);
         unset($data['ajax']);
+        unset($data['enabled']);
 
         // check if source already exists
         $id = \F3::get('PARAMS["id"]');
@@ -192,9 +194,9 @@ class Sources extends BaseController {
 
         // add/edit source
         if (!$sourceExists) {
-            $id = $sourcesDao->add($title, $tags, $filter, $spout, $data);
+            $id = $sourcesDao->add($title, $tags, $filter, $spout, $data, $enabled);
         } else {
-            $sourcesDao->edit($id, $title, $tags, $filter, $spout, $data);
+            $sourcesDao->edit($id, $title, $tags, $filter, $spout, $data, $enabled);
         }
 
         // autocolor tags
@@ -209,7 +211,8 @@ class Sources extends BaseController {
         $return = [
             'success' => true,
             'id' => (int) $id,
-            'title' => $title
+            'title' => $title,
+            'enabled' => $enabled
         ];
 
         // only for selfoss ui (update stats in navigation)

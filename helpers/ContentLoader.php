@@ -32,7 +32,8 @@ class ContentLoader {
     public function update() {
         $sourcesDao = new \daos\Sources();
         foreach ($sourcesDao->getByLastUpdate() as $source) {
-            $this->fetch($source);
+            if (isset($source['enabled']) && $source['enabled'] != 0)
+                $this->fetch($source);
         }
         $this->cleanup();
     }
