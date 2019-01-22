@@ -74,6 +74,12 @@ class parsehtml extends \spouts\spout {
             'type' => 'text',
             'default' => '',
             'required' => false
+        ],
+        'iconurl' => [
+            'title' => 'Manually set icon url',
+            'type' => 'text',
+            'default' => '',
+            'required' => false
         ]
     ];
 
@@ -96,6 +102,9 @@ class parsehtml extends \spouts\spout {
     public function load($params) {
 
         $this->htmlUrl = $params['url'];
+        if (!empty($params['iconurl'])) {
+            $this->faviconUrl = $params['iconurl'];
+        }
 
         if (function_exists('curl_init') && !ini_get('open_basedir')) {
             $content = $this->file_get_contents_curl($this->htmlUrl, $params);
@@ -296,12 +305,22 @@ class parsehtml extends \spouts\spout {
             if ($htmlUrl && $imageHelper->fetchFavicon($htmlUrl, true)) {
                 $this->faviconUrl = $imageHelper->getFaviconUrl();
                 \F3::get('logger')->debug('icon: using feed homepage favicon: ' . $this->faviconUrl);
+            } else if ($htmlUrl && $imageHelper->fetchFavicon($this->getRootUrl($htmlUrl), true)) {
+                $this->faviconUrl = $imageHelper->getFaviconUrl();
+                \F3::get('logger')->debug('icon: using root domain icon: ' . $this->faviconUrl);
+            } else if ($htmlUrl && $imageHelper->fetchFavicon($params['baseurl'], true)) {
+                $this->faviconUrl = $imageHelper->getFaviconUrl();
+                \F3::get('logger')->debug('icon: using baseurl icon: ' . $this->faviconUrl);
             }
         } catch (\Exception $e) {
             \F3::get('logger')->debug('icon: error', ['exception' => $e]);
         }
 
         return $this->faviconUrl;
+    }
+
+    private function getRootUrl($url) {
+        return parse_url($url, PHP_URL_SCHEME) . "://" . parse_url($url, PHP_URL_HOST) . (!empty(parse_url($url, PHP_URL_PORT)) ? ":" . parse_url($url, PHP_URL_PORT) : "" ) . "/";
     }
 
     /**
