@@ -175,11 +175,13 @@ selfoss.events.entries = function() {
             var open = entry.find('.entry-toolbar').first().is(':visible');
             var unread = entry.hasClass("unread");
 
-            if (!open)
-                entry.find('.entry-title').click();
+            setTimeout(function() {
+                if (!open)
+                    entry.find('.entry-title').click();
 
-            if (!unread)
-                entry.find('.entry-toolbar .entry-unread').click();
+                if (!unread)
+                    entry.find('.entry-toolbar .entry-unread').click();
+            }, 10);
 
             entry.find('.entry-title').click();
         });

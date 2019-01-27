@@ -439,7 +439,6 @@ body * {
     border: 1px solid rgba(255, 255, 255, 0);
 }
 
-    .entry.selected.unread,
     .entry.unread {
         margin-left: 3px;
         border-left:3px solid #5f9490;
@@ -1148,7 +1147,6 @@ body.authenabled.loggedin #nav-logout {
         column-count: 1;
     }
     
-    .entry.selected.unread,
     .entry.unread {
         border-right:5px solid #5f9490;
         border-left:0;
