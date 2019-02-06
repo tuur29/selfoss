@@ -50,6 +50,12 @@ class Rss extends BaseController {
         $lastid = -1;
         $itemDao = new \daos\Items();
         foreach ($itemDao->get($options) as $item) {
+
+            // skip if is read
+            if (\F3::get('rss_only_unread') == 1 && $item['unread'] != -1) {
+                continue;
+            }
+
             if ($newestEntryDate === false) {
                 $newestEntryDate = $item['datetime'];
             }

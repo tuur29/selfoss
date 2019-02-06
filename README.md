@@ -21,6 +21,7 @@ EDITS
 * Refresh sources directly from sources page
 * Disable / enable sources
 * Show a last updated timestamp when editing a source
+* Add option to only show unread items on rss feed
 
 See all commits [here](https://github.com/tuur29/selfoss/commits?author=tuur29)
 
