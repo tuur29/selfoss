@@ -29,6 +29,13 @@ select, input {
 	background: #2a2a2a
 }
 
+@media screen and (max-width: 1024px) {
+	.source button {
+		background: #111;
+		color: #aaa;
+	}
+}
+
 .entry-title {
 	color: #ccc !important;
 }

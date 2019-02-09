@@ -1091,7 +1091,8 @@ body.authenabled.loggedin #nav-logout {
     .source-showparams,
     .source-delete,
     .source-save,
-    .source-cancel {
+    .source-cancel,
+    .source-refresh {
         color:#333;
         border:0;
         background:#ededed;

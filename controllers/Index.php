@@ -22,18 +22,20 @@ class Index extends BaseController {
      */
     public function home(Base $f3) {
         $options = $_GET;
-        
-        // TODO: does secret login still work?
-        // secret login
-        $nosecretlogin = true;
-        if ( \F3::get('secret') == 1 && \F3::get('password') == $_GET['secret'] ) {
-            \F3::get('auth')->loginWithoutUser();
-            $_SESSION['loggedin'] = true;
-            setcookie("onlineSession", "true", time()+(3600*24*10), dirname($_SERVER['REQUEST_URI']).'/'  );
-            $nosecretlogin = false;
-        }
 
         if (!$f3->ajax()) {
+
+            // secret login
+            if ( \F3::get('secret') == 1 && \F3::get('password') == $_GET['secret'] && !\F3::get('auth')->isLoggedIn()) {
+                \F3::get('auth')->loginWithoutUser();
+                $_SESSION['loggedin'] = true;
+                echo "<script>
+                    window.localStorage.setItem('onlineSession', true);
+                    window.localStorage.setItem('enableOffline', true);
+                    window.location = window.location.href.split('#')[0];
+                </script>";
+            }
+
             // show as full html page
             $this->view->publicMode = \F3::get('public') == 1;
             $this->view->authEnabled = \F3::get('auth')->enabled() === true;
@@ -42,7 +44,7 @@ class Index extends BaseController {
             return;
         }
 
-        $this->needsLoggedInOrPublicMode();
+        $this->needsLoggedInOrPublicModeOrSecret();
 
         // get search param
         if (isset($options['search']) && strlen($options['search']) > 0) {
