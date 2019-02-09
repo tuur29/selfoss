@@ -12,36 +12,12 @@ namespace spouts\rss;
  */
 class heise extends feed {
     /** @var string name of spout */
-    public $name = 'News: Heise';
+    public $name = '[German] heise.de';
 
     /** @var string description of this source type */
-    public $description = 'This feed fetches the heise news with full content (not only the header as content)';
+    public $description = 'Fetch the heise news with full content (not only the header as content).';
 
-    /**
-     * config params
-     * array of arrays with name, type, default value, required, validation type
-     *
-     * - Values for type: text, password, checkbox, select
-     * - Values for validation: alpha, email, numeric, int, alnum, notempty
-     *
-     * When type is "select", a new entry "values" must be supplied, holding
-     * key/value pairs of internal names (key) and displayed labels (value).
-     * See /spouts/rss/heise for an example.
-     *
-     * e.g.
-     * array(
-     *   "id" => array(
-     *     "title"      => "URL",
-     *     "type"       => "text",
-     *     "default"    => "",
-     *     "required"   => true,
-     *     "validation" => array("alnum")
-     *   ),
-     *   ....
-     * )
-     *
-     * @var bool|mixed
-     */
+    /** @var array configurable parameters */
     public $params = [
         'section' => [
             'title' => 'Section',
@@ -123,22 +99,22 @@ class heise extends feed {
     /**
      * loads content for given source
      *
-     * @param string $url
+     * @param array $params
      *
      * @return void
      */
-    public function load($params) {
+    public function load(array $params) {
         parent::load(['url' => $this->getXmlUrl($params)]);
     }
 
     /**
      * returns the xml feed url for the source
      *
-     * @param mixed $params params for the source
+     * @param array $params params for the source
      *
      * @return string url as xml
      */
-    public function getXmlUrl($params) {
+    public function getXmlUrl(array $params) {
         return $this->feedUrls[$params['section']];
     }
 
@@ -148,7 +124,7 @@ class heise extends feed {
      * @return string content
      */
     public function getContent() {
-        if ($this->items !== false && $this->valid()) {
+        if ($this->items !== null && $this->valid()) {
             $originalContent = file_get_contents($this->getLink());
             foreach ($this->textDivs as $div) {
                 $content = $this->getTag($div[1], $div[2], $originalContent, $div[0], $div[3]);
@@ -165,20 +141,22 @@ class heise extends feed {
      * get tag by attribute
      * taken from http://www.catswhocode.com/blog/15-php-regular-expressions-for-web-developers
      *
+     * @param string $attr attribute
+     * @param string $value necessary value
+     * @param string $xml data string
+     * @param ?string $tag optional tag
+     * @param ?string $end optional ending
+     *
      * @return string content
-     * @return string $attr attribute
-     * @return string $value necessary value
-     * @return string $xml data string
-     * @return string $tag optional tag
      */
     private function getTag($attr, $value, $xml, $tag = null, $end = null) {
-        if (is_null($tag)) {
+        if ($tag === null) {
             $tag = '\w+';
         } else {
             $tag = preg_quote($tag);
         }
 
-        if (is_null($end)) {
+        if ($end === null) {
             $end = '</\1>';
         } else {
             $end = preg_quote($end);

@@ -2,6 +2,8 @@
 
 namespace controllers;
 
+use Base;
+
 /**
  * Controller for root
  *
@@ -14,20 +16,14 @@ class Index extends BaseController {
      * home site
      * html
      *
+     * @param Base $f3 fatfree base instance
+     *
      * @return void
      */
-    public function home() {
-        // parse params
-        $options = [];
-        if (\F3::get('homepage') != '') {
-            $options = ['type' => \F3::get('homepage')];
-        }
-
-        // use ajax given params?
-        if (count($_GET) > 0) {
-            $options = $_GET;
-        }
-
+    public function home(Base $f3) {
+        $options = $_GET;
+        
+        // TODO: does secret login still work?
         // secret login
         $nosecretlogin = true;
         if ( \F3::get('secret') == 1 && \F3::get('password') == $_GET['secret'] ) {
@@ -37,7 +33,7 @@ class Index extends BaseController {
             $nosecretlogin = false;
         }
 
-        if (!isset($options['ajax'])) {
+        if (!$f3->ajax()) {
             // show as full html page
             $this->view->publicMode = \F3::get('public') == 1;
             $this->view->authEnabled = \F3::get('auth')->enabled() === true;
@@ -90,7 +86,7 @@ class Index extends BaseController {
         }
 
         // ajax call = only send entries and statistics not full template
-        if (isset($options['ajax'])) {
+        if ($f3->ajax()) {
             $this->view->jsonSuccess([
                 'lastUpdate' => \helpers\ViewHelper::date_iso8601($itemsDao->lastUpdate()),
                 'hasMore' => $items['hasMore'],
@@ -210,9 +206,12 @@ class Index extends BaseController {
     /**
      * load items
      *
+     * @param array $options
+     * @param array $tags
+     *
      * @return string html with items
      */
-    private function loadItems($options, $tags) {
+    private function loadItems(array $options, array $tags) {
         $itemDao = new \daos\Items();
         $itemsHtml = '';
 

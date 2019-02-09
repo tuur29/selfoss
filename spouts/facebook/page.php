@@ -2,7 +2,7 @@
 
 namespace spouts\facebook;
 
-use GuzzleHttp\Url;
+use GuzzleHttp\Psr7\Uri;
 use helpers\WebClient;
 
 /**
@@ -17,32 +17,12 @@ use helpers\WebClient;
  */
 class page extends \spouts\spout {
     /** @var string name of source */
-    public $name = 'Facebook page feed';
+    public $name = 'Facebook: page feed';
 
     /** @var string description of this source type */
-    public $description = 'Page wall';
+    public $description = 'Get posts from given Facebook page wall.';
 
-    /**
-     * config params
-     * array of arrays with name, type, default value, required, validation type
-     *
-     * - Values for type: text, password, checkbox
-     * - Values for validation: alpha, email, numeric, int, alnum, notempty
-     *
-     * e.g.
-     * array(
-     *   "id" => array(
-     *     "title"      => "URL",
-     *     "type"       => "text",
-     *     "default"    => "",
-     *     "required"   => true,
-     *     "validation" => array("alnum")
-     *   ),
-     *   ....
-     * )
-     *
-     * @var bool|mixed
-     */
+    /** @var array configurable parameters */
     public $params = [
         'user' => [
             'title' => 'Page name',
@@ -76,17 +56,18 @@ class page extends \spouts\spout {
     /**
      * loads content for given source
      *
-     * @param mixed $params the params of this source
+     * @param array $params the params of this source
      *
      * @return void
      */
-    public function load($params) {
+    public function load(array $params) {
         $http = WebClient::getHttpClient();
-        $url = Url::fromString('https://graph.facebook.com/' . urlencode($params['user']));
-        $qs = $url->getQuery();
-        $qs['access_token'] = $params['app_id'] . '|' . $params['app_secret'];
-        $qs['fields'] = 'name,picture{url},link,feed{id,message,created_time,attachments,permalink_url}';
-        $data = $http->get($url)->json();
+        $url = new Uri('https://graph.facebook.com/' . urlencode($params['user']));
+        $url = $url->withQueryValues($url, [
+            'access_token' => $params['app_id'] . '|' . $params['app_secret'],
+            'fields' => 'name,picture{url},link,feed{id,message,created_time,attachments,permalink_url}',
+        ]);
+        $data = json_decode((string) $http->get($url)->getBody(), true);
 
         $this->spoutTitle = $data['name'];
         $this->pagePicture = $data['picture']['data']['url'];

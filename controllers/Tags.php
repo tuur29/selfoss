@@ -38,9 +38,11 @@ class Tags extends BaseController {
      * returns all tags
      * html
      *
+     * @param array $tags
+     *
      * @return string
      */
-    public function renderTags($tags) {
+    public function renderTags(array $tags) {
         $html = '';
         foreach ($tags as $tag) {
             $this->view->tag = $tag['tag'];
@@ -99,10 +101,10 @@ class Tags extends BaseController {
         $tag = $data['tag'];
         $color = $data['color'];
 
-        if (!isset($tag) || strlen(trim($tag)) == 0) {
+        if (!isset($tag) || strlen(trim($tag)) === 0) {
             $this->view->error('invalid or no tag given');
         }
-        if (!isset($color) || strlen(trim($color)) == 0) {
+        if (!isset($color) || strlen(trim($color)) === 0) {
             $this->view->error('invalid or no color given');
         }
 

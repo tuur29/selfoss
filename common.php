@@ -2,6 +2,7 @@
 
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\ErrorLogHandler;
+use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -32,14 +33,16 @@ if (file_exists('config.ini')) {
 // overwrite config with ENV variables
 $env_prefix = $f3->get('env_prefix');
 foreach ($f3->get('ENV') as $key => $value) {
-    if (strncasecmp($key, $env_prefix, strlen($env_prefix)) == 0) {
+    if (strncasecmp($key, $env_prefix, strlen($env_prefix)) === 0) {
         $f3->set(strtolower(substr($key, strlen($env_prefix))), $value);
     }
 }
 
 // init logger
 $log = new Logger('selfoss');
-if ($f3->get('logger_level') !== 'NONE') {
+if ($f3->get('logger_level') === 'NONE') {
+    $log->pushHandler(new NullHandler());
+} else {
     $logger_destination = $f3->get('logger_destination');
 
     if (strpos($logger_destination, 'file:') === 0) {
@@ -80,5 +83,5 @@ $f3->set('ONERROR',
 );
 
 if (\F3::get('DEBUG') != 0) {
-    ini_set('display_errors', 0);
+    ini_set('display_errors', '0');
 }

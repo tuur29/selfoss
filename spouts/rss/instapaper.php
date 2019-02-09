@@ -15,33 +15,9 @@ class instapaper extends feed {
     public $name = 'RSS Feed (with instapaper)';
 
     /** @var string description of this source type */
-    public $description = 'This feed cleaning the content with instapaper.com';
+    public $description = 'Get feed and clean the content with instapaper.com service.';
 
-    /**
-     * config params
-     * array of arrays with name, type, default value, required, validation type
-     *
-     * - Values for type: text, password, checkbox, select
-     * - Values for validation: alpha, email, numeric, int, alnum, notempty
-     *
-     * When type is "select", a new entry "values" must be supplied, holding
-     * key/value pairs of internal names (key) and displayed labels (value).
-     * See /spouts/rss/heise for an example.
-     *
-     * e.g.
-     * array(
-     *   "id" => array(
-     *     "title"      => "URL",
-     *     "type"       => "text",
-     *     "default"    => "",
-     *     "required"   => true,
-     *     "validation" => array("alnum")
-     *   ),
-     *   ....
-     * )
-     *
-     * @var bool|mixed
-     */
+    /** @var array configurable parameters */
     public $params = [
         'url' => [
             'title' => 'URL',
@@ -55,11 +31,11 @@ class instapaper extends feed {
     /**
      * loads content for given source
      *
-     * @param string $url
+     * @param array $params
      *
      * @return void
      */
-    public function load($params) {
+    public function load(array $params) {
         parent::load(['url' => $params['url']]);
     }
 
@@ -70,7 +46,7 @@ class instapaper extends feed {
      */
     public function getContent() {
         $contentFromInstapaper = $this->fetchFromInstapaper(parent::getLink());
-        if ($contentFromInstapaper === false) {
+        if ($contentFromInstapaper === null) {
             return 'instapaper parse error <br />' . parent::getContent();
         }
 
@@ -81,6 +57,8 @@ class instapaper extends feed {
      * fetch content from instapaper.com
      *
      * @author janeczku @github
+     *
+     * @param string $url
      *
      * @return string content
      */
@@ -93,7 +71,7 @@ class instapaper extends feed {
         $dom = new \DOMDocument();
         @$dom->loadHTML($content);
         if (!$dom) {
-            return false;
+            return null;
         }
         $xpath = new \DOMXPath($dom);
         $elements = $xpath->query("//div[@id='story']");

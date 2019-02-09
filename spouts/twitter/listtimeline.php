@@ -13,8 +13,8 @@ use Abraham\TwitterOAuth\TwitterOAuth;
  */
 class listtimeline extends \spouts\twitter\usertimeline {
     public function __construct() {
-        $this->name = 'Twitter - List timeline';
-        $this->description = 'The timeline of a given list';
+        $this->name = 'Twitter: list timeline';
+        $this->description = 'Fetch the timeline of a given list.';
         $this->params = [
             'consumer_key' => [
                 'title' => 'Consumer Key',
@@ -64,11 +64,11 @@ class listtimeline extends \spouts\twitter\usertimeline {
     /**
      * loads content for given list
      *
-     * @param mixed $params the params of this source
+     * @param array $params the params of this source
      *
      * @return void
      */
-    public function load($params) {
+    public function load(array $params) {
         $access_token_used = !empty($params['access_token']) && !empty($params['access_token_secret']);
         $twitter = new TwitterOAuth($params['consumer_key'], $params['consumer_secret'], $access_token_used ? $params['access_token'] : null, $access_token_used ? $params['access_token_secret'] : null);
         $timeline = $twitter->get('lists/statuses',

@@ -31,6 +31,7 @@ class View {
         $this->genMinified(self::STATIC_RESOURCE_JS);
         $this->genMinified(self::STATIC_RESOURCE_CSS);
         $this->base = $this->getBaseUrl();
+        $this->genOfflineSW();
     }
 
     /**
@@ -45,14 +46,14 @@ class View {
         if (strlen(trim(\F3::get('base_url'))) > 0) {
             $base = \F3::get('base_url');
             $length = strlen($base);
-            if ($length > 0 && substr($base, $length - 1, 1) != '/') {
+            if ($length > 0 && substr($base, $length - 1, 1) !== '/') {
                 $base .= '/';
             }
         } else { // auto generate base url
             $protocol = 'http';
             if ((isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
-                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') ||
-                (isset($_SERVER['HTTP_HTTPS']) && $_SERVER['HTTP_HTTPS'] == 'https')) {
+                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
+                (isset($_SERVER['HTTP_HTTPS']) && $_SERVER['HTTP_HTTPS'] === 'https')) {
                 $protocol = 'https';
             }
 
@@ -67,8 +68,8 @@ class View {
             }
 
             $port = '';
-            if (($protocol == 'http' && $_SERVER['SERVER_PORT'] != '80') ||
-                ($protocol == 'https' && $_SERVER['SERVER_PORT'] != '443')) {
+            if (($protocol === 'http' && $_SERVER['SERVER_PORT'] != '80') ||
+                ($protocol === 'https' && $_SERVER['SERVER_PORT'] != '443')) {
                 $port = ':' . $_SERVER['SERVER_PORT'];
             }
             //Override the port if nginx is the front end and the traffic is being forwarded
@@ -113,7 +114,7 @@ class View {
     /**
      * send error message as json string
      *
-     * @param mixed $datan
+     * @param mixed $data
      *
      * @return void
      */
@@ -125,7 +126,7 @@ class View {
     /**
      * send success message as json string
      *
-     * @param mixed $datan
+     * @param mixed $data
      *
      * @return void
      */
@@ -144,6 +145,7 @@ class View {
     public static function maxmtime(array $filePaths) {
         $maxmtime = 0;
         foreach ($filePaths as $filePath) {
+            $filePath = explode('?', $filePath)[0]; // strip query string
             $fullPath = \F3::get('BASEDIR') . '/' . $filePath;
 
             if (!file_exists($fullPath)) {
@@ -184,11 +186,6 @@ class View {
     private function genMinified($type) {
         self::$staticmtime[$type] = self::maxmtime(\F3::get($type));
 
-        if ($type == self::STATIC_RESOURCE_JS) {
-            $filename = self::getGlobalJsFileName();
-        } elseif ($type == self::STATIC_RESOURCE_CSS) {
-            $filename = self::getGlobalCssFileName();
-        }
         $target = \F3::get('BASEDIR') . '/public/' . self::$staticPrefix . '.' . $type;
 
         // build if needed
@@ -196,9 +193,9 @@ class View {
             ini_set('max_execution_time', 300);
             $minified = '';
             foreach (\F3::get($type) as $file) {
-                if ($type == self::STATIC_RESOURCE_JS) {
+                if ($type === self::STATIC_RESOURCE_JS) {
                     $minifiedFile = $this->minifyJs(file_get_contents(\F3::get('BASEDIR') . '/' . $file));
-                } elseif ($type == self::STATIC_RESOURCE_CSS) {
+                } elseif ($type === self::STATIC_RESOURCE_CSS) {
                     $minifiedFile = $this->minifyCss(file_get_contents(\F3::get('BASEDIR') . '/' . $file));
                 }
                 $minified = $minified . "\n" . $minifiedFile;
@@ -219,7 +216,7 @@ class View {
             return $content;
         }
 
-        return \JSMin::minify($content);
+        return \JShrink\Minifier::minify($content);
     }
 
     /**
@@ -235,5 +232,82 @@ class View {
         }
 
         return \CssMin::minify($content);
+    }
+
+    /**
+     * List files according to globbing pattern from selfoss base.
+     *
+     * @param string $relativePattern relative globbing pattern
+     *
+     * @return array list of files paths relative to base
+     */
+    private static function ls($relativePattern) {
+        $files = [];
+        $absolutePattern = \F3::get('BASEDIR') . '/' . $relativePattern;
+        $basePathLength = strlen(\F3::get('BASEDIR')) + 1;
+        foreach (glob($absolutePattern) as $fn) {
+            if ($fn[0] != '.') {
+                $files[] = substr($fn, $basePathLength);
+            }
+        }
+
+        return $files;
+    }
+
+    public static function offlineFiles() {
+        $offlineFiles = array_merge([
+                'public/' . self::getGlobalJsFileName(),
+                'public/' . self::getGlobalCssFileName()
+            ],
+            self::ls('public/images/*')
+        );
+
+        return $offlineFiles;
+    }
+
+    public static function offlineMtime(array $offlineFiles) {
+        $indirectResources = [
+            'defaults.ini',
+            'config.ini',
+            'templates/home.phtml',
+            'public/js/selfoss-sw-offline.js'
+        ];
+
+        return self::maxmtime(array_merge($offlineFiles, $indirectResources));
+    }
+
+    /**
+     * Build the offline service worker source from static resources.
+     *
+     * @return void
+     */
+    public function genOfflineSW() {
+        $offlineFiles = self::offlineFiles();
+        $staticmtime = self::offlineMtime($offlineFiles);
+
+        $target = \F3::get('BASEDIR') . '/public/selfoss-sw-offline.js';
+
+        if (!file_exists($target) || filemtime($target) < $staticmtime) {
+            $subdir = parse_url($this->base)['path'];
+
+            $data = [
+                'subdir' => $subdir,
+                'version' => $staticmtime,
+                'files' => [$subdir]
+            ];
+
+            foreach ($offlineFiles as $fn) {
+                if (substr($fn, 0, 7) == 'public/') {
+                    $fn = substr($fn, 7);
+                }
+                $data['files'][] = $subdir . $fn;
+            }
+
+            $offlineWorker = 'var offlineManifest = ';
+            $offlineWorker .= json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            $offlineWorker .= ";\n\n\n";
+            $offlineWorker .= file_get_contents(\F3::get('BASEDIR') . '/public/js/selfoss-sw-offline.js');
+            file_put_contents($target, $offlineWorker);
+        }
     }
 }

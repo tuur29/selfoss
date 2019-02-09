@@ -23,11 +23,11 @@ class Authentication {
 
         $base_url = parse_url(\helpers\View::getBaseUrl());
 
-        ini_set('session.gc_maxlifetime', 3600*24*14);
+        ini_set('session.gc_maxlifetime', 3600*24*30);
 
         // session cookie will be valid for one month.
-        $cookie_expire = 3600 * 24 * 14;
-        $cookie_secure = $base_url['scheme'] == 'https';
+        $cookie_expire = 3600 * 24 * 30;
+        $cookie_secure = $base_url['scheme'] === 'https';
         $cookie_httponly = true;
         $cookie_path = $base_url['path'];
         $cookie_domain = $base_url['host'];
@@ -38,7 +38,7 @@ class Authentication {
         \F3::get('logger')->debug("set cookie on $cookie_domain$cookie_path expiring in $cookie_expire seconds");
 
         session_name();
-        if (session_id() == '') {
+        if (session_id() === '') {
             session_start();
         }
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
@@ -91,7 +91,7 @@ class Authentication {
     public function login($username, $password) {
         if ($this->enabled()) {
             if (
-                $username == \F3::get('username') && hash('sha512', \F3::get('salt') . $password) == \F3::get('password')
+                $username === \F3::get('username') && hash('sha512', \F3::get('salt') . $password) === \F3::get('password')
             ) {
                 $this->loggedin = true;
                 $_SESSION['loggedin'] = true;

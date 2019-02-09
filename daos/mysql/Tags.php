@@ -40,7 +40,7 @@ class Tags extends Database {
      * @return void
      */
     public function autocolorTag($tag) {
-        if (strlen(trim($tag)) == 0) {
+        if (strlen(trim($tag)) === 0) {
             return;
         }
 
@@ -97,10 +97,10 @@ class Tags extends Database {
      *
      * @return void
      */
-    public function cleanup($tags) {
+    public function cleanup(array $tags) {
         $tagsInDb = $this->get();
         foreach ($tagsInDb as $tag) {
-            if (in_array($tag['tag'], $tags) === false) {
+            if (in_array($tag['tag'], $tags, true) === false) {
                 $this->delete($tag['tag']);
             }
         }
@@ -108,6 +108,8 @@ class Tags extends Database {
 
     /**
      * returns whether a color is used or not
+     *
+     * @param string $color
      *
      * @return bool true if color is used by an tag
      */
@@ -120,10 +122,12 @@ class Tags extends Database {
     /**
      * check whether tag color is defined.
      *
+     * @param string $tag
+     *
      * @return bool true if color is used by an tag
      */
     public function hasTag($tag) {
-        if (\F3::get('db_type') == 'mysql') {
+        if (\F3::get('db_type') === 'mysql') {
             $where = 'WHERE tag = _utf8mb4 :tag COLLATE utf8mb4_general_ci';
         } else {
             $where = 'WHERE tag=:tag';

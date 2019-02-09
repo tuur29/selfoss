@@ -67,42 +67,26 @@ class Sources extends Database {
      *
      * @param string $title
      * @param string $spout
-     * @param mixed $params
+     * @param array $params
      *
-     * @return bool|mixed true on succes or array of
-     * errors on failure
+     * @return bool|array true on success or array of errors on failure
      *
      * @author Tobias Zeising
      */
-    public function validate($title, $spout, $params) {
+    public function validate($title, $spout, array $params) {
         $result = [];
 
         // title
-        if (strlen(trim($title)) == 0) {
+        if (strlen(trim($title)) === 0) {
             $result['title'] = 'no text for title given';
         }
 
         // spout type
         $spoutLoader = new \helpers\SpoutLoader();
         $spout = $spoutLoader->get($spout);
-        if ($spout == false) {
+        if ($spout === null) {
             $result['spout'] = 'invalid spout type';
         } else { // check params
-            // params given but not expected
-            if ($spout->params === false) {
-                if (is_array($spout->params) && count($spout->params) > 0) {
-                    $result['spout'] = 'this spout doesn\'t expect any param';
-                }
-            }
-
-            if ($spout->params == false) {
-                if (count($result) > 0) {
-                    return $result;
-                }
-
-                return true;
-            }
-
             // required but not given params
             foreach ($spout->params as $id => $param) {
                 if ($param['required'] === false) {
@@ -114,30 +98,36 @@ class Sources extends Database {
                         $found = true;
                     }
                 }
-                if ($found == false) {
+                if ($found === false) {
                     $result[$id] = 'param ' . $param['title'] . ' required but not given';
                 }
             }
 
             // given params valid?
             foreach ($params as $id => $value) {
+                if (!isset($spout->params[$id])) {
+                    $result[$id] = 'unexpected param ' . $id;
+
+                    continue;
+                }
+
                 $validation = $spout->params[$id]['validation'];
                 if (!is_array($validation)) {
                     $validation = [$validation];
                 }
 
                 foreach ($validation as $validate) {
-                    if ($validate == 'alpha' && !preg_match("[A-Za-Z._\b]+", $value)) {
+                    if ($validate === 'alpha' && !preg_match("[A-Za-Z._\b]+", $value)) {
                         $result[$id] = 'only alphabetic characters allowed for ' . $spout->params[$id]['title'];
-                    } elseif ($validate == 'email' && !preg_match('/^[^0-9][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[@][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,4}$/', $value)) {
+                    } elseif ($validate === 'email' && !preg_match('/^[^0-9][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[@][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,4}$/', $value)) {
                         $result[$id] = $spout->params[$id]['title'] . ' is not a valid email address';
-                    } elseif ($validate == 'numeric' && !is_numeric($value)) {
+                    } elseif ($validate === 'numeric' && !is_numeric($value)) {
                         $result[$id] = 'only numeric values allowed for ' . $spout->params[$id]['title'];
-                    } elseif ($validate == 'int' && intval($value) != $value) {
+                    } elseif ($validate === 'int' && (int) $value != $value) {
                         $result[$id] = 'only integer values allowed for ' . $spout->params[$id]['title'];
-                    } elseif ($validate == 'alnum' && !preg_match("[A-Za-Z0-9._\b]+", $value)) {
+                    } elseif ($validate === 'alnum' && !preg_match("[A-Za-Z0-9._\b]+", $value)) {
                         $result[$id] = 'only alphanumeric values allowed for ' . $spout->params[$id]['title'];
-                    } elseif ($validate == 'notempty' && strlen(trim($value)) == 0) {
+                    } elseif ($validate === 'notempty' && strlen(trim($value)) === 0) {
                         $result[$id] = 'empty value for ' . $spout->params[$id]['title'] . ' not allowed';
                     }
                 }
@@ -145,7 +135,7 @@ class Sources extends Database {
 
             // select: user sent value which is not a predefined option?
             foreach ($params as $id => $value) {
-                if ($spout->params[$id]['type'] != 'select') {
+                if ($spout->params[$id]['type'] !== 'select') {
                     continue;
                 }
 
@@ -157,7 +147,7 @@ class Sources extends Database {
                         $found = true;
                     }
                 }
-                if ($found == false) {
+                if ($found === false) {
                     $result[$id] = 'param ' . $spout->params[$id]['title'] . ' was not set to a predefined value';
                 }
             }

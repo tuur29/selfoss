@@ -14,7 +14,7 @@ class enclosures extends feed {
     public $name = 'RSS Feed (with enclosures)';
 
     /** @var string description of this source type */
-    public $description = 'This feed type adds image enclosures to the feed content';
+    public $description = 'Get posts from RSS feed, including media enclosures.';
 
     /**
      * returns the content of this item
@@ -22,10 +22,10 @@ class enclosures extends feed {
      * @return string content
      */
     public function getContent() {
-        if ($this->items !== false && $this->valid()) {
+        if ($this->items !== null && $this->valid()) {
             $content = parent::getContent();
             foreach (@current($this->items)->get_enclosures() as $enclosure) {
-                if ($enclosure->get_medium() == 'image') {
+                if ($enclosure->get_medium() === 'image') {
                     $title = htmlspecialchars(strip_tags($enclosure->get_title()));
                     $content .= '<img src="' . $enclosure->get_link() . '" alt="' . $title . '" title="' . $title . '" />';
                 }

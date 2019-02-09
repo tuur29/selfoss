@@ -2,7 +2,7 @@
 <div role="form" id="source<?= $idAttr ?>"
         class="source <?= isset($this->source) === false ? 'source-new' : '' ?> <?= (isset($this->source) && isset($this->source['error']) && strlen($this->source['error']) > 0) ? 'error' : '' ?> <?= ($this->source['enabled'] ? "source-enabled" : "source-disabled") ?>">
     <div class="source-icon">
-        <?php if (isset($this->source) && isset($this->source['icon']) && $this->source['icon'] !== false && $this->source['icon'] != '0') : ?>
+        <?php if (isset($this->source) && isset($this->source['icon']) && $this->source['icon'] != '0') : ?>
         <img src="<?= 'favicons/' . $this->source['icon']; ?>" alt="" />
         <?php endif; ?>
     </div>
@@ -59,7 +59,7 @@
             <select id="type-<?= $idAttr ?>" class="source-spout" name="spout">
                 <option value=""><?= \F3::get('lang_source_select')?></option>
                 <?php foreach ($this->spouts as $spouttype => $spout) : ?>
-                <option value="<?= str_replace('\\', '_', $spouttype); ?>" <?= isset($this->source) && $spouttype == $this->source['spout'] ? 'selected="selected"' : ''; ?>>
+                <option title="<?= $spout->description ?>" value="<?= str_replace('\\', '_', $spouttype); ?>" <?= isset($this->source) && $spouttype === $this->source['spout'] ? 'selected="selected"' : ''; ?>>
                     <?= $spout->name; ?>
                 </option>
                 <?php endforeach; ?>
@@ -78,7 +78,7 @@
         <li class="source-params">
         <?php
             if (isset($this->source) && isset($this->spouts[$this->source['spout']])) {
-                if ($this->spouts[$this->source['spout']]->params !== false) {
+                if (count($this->spouts[$this->source['spout']]->params) > 0) {
                     $this->spout = $this->spouts[$this->source['spout']];
                     $this->params = json_decode(html_entity_decode($this->source['params']), true);
                     $this->idAttr = $idAttr;

@@ -28,8 +28,8 @@ class Statements {
     /**
      * null first for order by clause
      *
-     * @param column to concat
-     * @param order
+     * @param string $column column to concat
+     * @param string $order
      *
      * @return string full statement
      */
@@ -40,7 +40,7 @@ class Statements {
     /**
      * sum statement for boolean columns
      *
-     * @param bool column to concat
+     * @param string $column column to concat
      *
      * @return string full statement
      */
@@ -51,7 +51,7 @@ class Statements {
     /**
      * bool true statement
      *
-     * @param column to check for truth
+     * @param string $column column to check for truth
      *
      * @return string full statement
      */
@@ -62,7 +62,7 @@ class Statements {
     /**
      * bool false statement
      *
-     * @param column to check for false
+     * @param string $column column to check for false
      *
      * @return string full statement
      */
@@ -73,13 +73,13 @@ class Statements {
     /**
      * check if CSV column matches a value.
      *
-     * @param CSV column to check
-     * @param value to search in CSV column
+     * @param string $column CSV column to check
+     * @param mixed $value value to search in CSV column
      *
      * @return string full statement
      */
     public static function csvRowMatches($column, $value) {
-        if ($value[0] == ':') {
+        if ($value[0] === ':') {
             $value = "_utf8mb4 $value";
         }
 
@@ -89,14 +89,14 @@ class Statements {
     /**
      * check column against int list.
      *
-     * @param int $column column to check
+     * @param string $column column to check
      * @param array $ints of string or int values to match column against
      *
      * @return ?string full statement
      */
     public static function intRowMatches($column, array $ints) {
         // checks types
-        if (!is_array($ints) && sizeof($ints) < 1) {
+        if (!is_array($ints) && count($ints) === 0) {
             return null;
         }
         $all_ints = [];
@@ -107,7 +107,7 @@ class Statements {
             }
         }
 
-        if (sizeof($all_ints) > 0) {
+        if (count($all_ints) > 0) {
             $comma_ints = implode(',', $all_ints);
 
             return $column . " IN ($comma_ints)";
@@ -117,7 +117,21 @@ class Statements {
     }
 
     /**
+     * Return the statement required to update a datetime column to the current
+     * datetime.
+     *
+     * @param string $column
+     *
+     * @return string full statement
+     */
+    public static function rowTouch($column) {
+        return $column . '=NOW()';
+    }
+
+    /**
      * Convert boolean into a representation recognized by the database engine.
+     *
+     * @param bool $bool
      *
      * @return string representation of boolean
      */
@@ -156,7 +170,7 @@ class Statements {
                             $value = (int) $row[$columnIndex];
                             break;
                         case \daos\PARAM_BOOL:
-                            if ($row[$columnIndex] == '1') {
+                            if ($row[$columnIndex] === '1') {
                                 $value = true;
                             } else {
                                 $value = false;

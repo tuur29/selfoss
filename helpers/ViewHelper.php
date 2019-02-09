@@ -20,7 +20,7 @@ class ViewHelper {
      * @return string with highlited words
      */
     public function highlight($content, $searchWords) {
-        if (strlen(trim($searchWords)) == 0) {
+        if (strlen(trim($searchWords)) === 0) {
             return $content;
         }
 
@@ -50,7 +50,7 @@ class ViewHelper {
     /**
      * Return ISO8601 formatted date
      *
-     * @param sql date
+     * @param string $datestr sql date
      *
      * @return string
      */

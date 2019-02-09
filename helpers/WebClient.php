@@ -5,7 +5,7 @@ namespace helpers;
 use Exception;
 use Fossar\GuzzleTranscoder\GuzzleTranscoder;
 use GuzzleHttp;
-use GuzzleHttp\Subscriber\Log\LogSubscriber;
+use GuzzleHttp\HandlerStack;
 
 /**
  * Helper class for web request
@@ -25,19 +25,24 @@ class WebClient {
      */
     public static function getHttpClient() {
         if (!isset(self::$httpClient)) {
-            $version = \F3::get('version');
-            $httpClient = new GuzzleHttp\Client([
-                'defaults' => [
-                    'headers' => [
-                        'User-Agent' => self::getUserAgent(),
-                    ]
-                ]
-            ]);
-            $httpClient->getEmitter()->attach(new GuzzleTranscoder());
+            $stack = HandlerStack::create();
+            $stack->push(new GuzzleTranscoder());
 
             if (\F3::get('logger_level') === 'DEBUG') {
-                $httpClient->getEmitter()->attach(new LogSubscriber(\F3::get('logger')));
+                $logger = GuzzleHttp\Middleware::log(
+                    \F3::get('logger'),
+                    new GuzzleHttp\MessageFormatter(GuzzleHttp\MessageFormatter::DEBUG),
+                    \Psr\Log\LogLevel::DEBUG
+                );
+                $stack->push($logger);
             }
+
+            $httpClient = new GuzzleHttp\Client([
+                'headers' => [
+                    'User-Agent' => self::getUserAgent(),
+                ],
+                'handler' => $stack,
+            ]);
 
             self::$httpClient = $httpClient;
         }
@@ -48,12 +53,14 @@ class WebClient {
     /**
      * get the user agent to use for web based spouts
      *
+     * @param ?string $agentInfo
+     *
      * @return string the user agent string for this spout
      */
     public static function getUserAgent($agentInfo = null) {
         $userAgent = 'Selfoss/' . \F3::get('version');
 
-        if (is_null($agentInfo)) {
+        if ($agentInfo === null) {
             $agentInfo = [];
         }
 
@@ -65,7 +72,8 @@ class WebClient {
     /**
      * Retrieve content from url
      *
-     * @param string $subagent Extra user agent info to use in the request
+     * @param string $url
+     * @param ?string $agentInfo Extra user agent info to use in the request
      *
      * @throws GuzzleHttp\Exception\RequestException When an error is encountered
      * @throws Exception Unless 200 0K response is received

@@ -85,7 +85,7 @@ class ContentLoader {
         // get spout
         $spoutLoader = new \helpers\SpoutLoader();
         $spout = $spoutLoader->get($source['spout']);
-        if ($spout === false) {
+        if ($spout === null) {
             \F3::get('logger')->error('unknown spout: ' . $source['spout']);
             $this->sourceDao->error($source['id'], 'unknown spout');
 
@@ -120,7 +120,7 @@ class ContentLoader {
         }
         $itemsFound = $this->itemsDao->findAll($itemsInFeed, $source['id']);
 
-        $lasticon = false;
+        $lasticon = null;
         $itemsSeen = [];
         foreach ($spout as $item) {
             // item already in database?
@@ -164,7 +164,7 @@ class ContentLoader {
 
             // sanitize title
             $title = $this->sanitizeField($item->getTitle());
-            if (strlen(trim($title)) == 0) {
+            if (strlen(trim($title)) === 0) {
                 $title = '[' . \F3::get('lang_no_title') . ']';
             }
 
@@ -194,7 +194,7 @@ class ContentLoader {
                 'datetime' => $itemDate->format('Y-m-d H:i:s'),
                 'uid' => $item->getId(),
                 'thumbnail' => $item->getThumbnail(),
-                'icon' => $icon !== false ? $icon : '',
+                'icon' => $icon !== null ? $icon : '',
                 'link' => htmLawed($item->getLink(), ['deny_attribute' => '*', 'elements' => '-*']),
                 'author' => $author
             ];
@@ -231,12 +231,14 @@ class ContentLoader {
     /**
      * Check if a new item matches the filter
      *
-     * @param $feed object and new item to add
+     * @param string $source
+     * @param string $title
+     * @param string $content
      *
      * @return bool indicating filter success
      */
     protected function filter($source, $title, $content) {
-        if (strlen(trim($source['filter'])) != 0) {
+        if (strlen(trim($source['filter'])) !== 0) {
             $resultTitle = @preg_match($source['filter'], $title);
             if ($resultTitle === false) {
                 \F3::get('logger')->error('filter error: ' . $source['filter']);
@@ -244,7 +246,7 @@ class ContentLoader {
                 return true; // do not filter out item
             }
             // test filter
-            if ($resultTitle == 0) {
+            if ($resultTitle === 0) {
                 return false;
             }
         }
@@ -294,17 +296,17 @@ class ContentLoader {
     /**
      * Fetch the thumbanil of a given item
      *
-     * @param $thumbnail the thumbnail url
-     * @param $newItem new item for saving in database
+     * @param string $thumbnail the thumbnail url
+     * @param array $newItem new item for saving in database
      *
      * @return array the newItem Object with thumbnail
      */
-    protected function fetchThumbnail($thumbnail, $newItem) {
+    protected function fetchThumbnail($thumbnail, array $newItem) {
         if (strlen(trim($thumbnail)) > 0) {
             $extension = 'jpg';
             $imageHelper = new \helpers\Image();
             $thumbnailAsJpg = $imageHelper->loadImage($thumbnail, $extension, 500, 500);
-            if ($thumbnailAsJpg !== false) {
+            if ($thumbnailAsJpg !== null) {
                 $written = file_put_contents(
                     'data/thumbnails/' . md5($thumbnail) . '.' . $extension,
                     $thumbnailAsJpg
@@ -327,22 +329,22 @@ class ContentLoader {
     /**
      * Fetch the icon of a given feed item
      *
-     * @param $icon icon given by the spout
-     * @param $newItem new item for saving in database
-     * @param $lasticon the last fetched icon (byref)
+     * @param string $icon icon given by the spout
+     * @param array $newItem new item for saving in database
+     * @param &string $lasticon the last fetched icon
      *
      * @return mixed newItem with icon
      */
-    protected function fetchIcon($icon, $newItem, &$lasticon) {
+    protected function fetchIcon($icon, array $newItem, &$lasticon) {
         if (strlen(trim($icon)) > 0) {
             $extension = 'png';
-            if ($icon == $lasticon) {
+            if ($icon === $lasticon) {
                 \F3::get('logger')->debug('use last icon: ' . $lasticon);
                 $newItem['icon'] = md5($lasticon) . '.' . $extension;
             } else {
                 $imageHelper = new \helpers\Image();
                 $iconAsPng = $imageHelper->loadImage($icon, $extension, 30, null);
-                if ($iconAsPng !== false) {
+                if ($iconAsPng !== null) {
                     $written = file_put_contents(
                         'data/favicons/' . md5($icon) . '.' . $extension,
                         $iconAsPng
@@ -378,7 +380,7 @@ class ContentLoader {
         $spoutLoader = new \helpers\SpoutLoader();
         $spout = $spoutLoader->get($data['spout']);
 
-        if ($spout === false) {
+        if ($spout === null) {
             \F3::get('logger')->error("Unknown spout '{$data['spout']}' when fetching title");
 
             return null;
@@ -410,7 +412,7 @@ class ContentLoader {
     public function cleanup() {
         // cleanup orphaned and old items
         \F3::get('logger')->debug('cleanup orphaned and old items');
-        $this->itemsDao->cleanup(\F3::get('items_lifetime'));
+        $this->itemsDao->cleanup((int) \F3::get('items_lifetime'));
         \F3::get('logger')->debug('cleanup orphaned and old items finished');
 
         // delete orphaned thumbnails
@@ -439,12 +441,12 @@ class ContentLoader {
      */
     protected function cleanupFiles($type) {
         \F3::set('im', $this->itemsDao);
-        if ($type == 'thumbnails') {
+        if ($type === 'thumbnails') {
             $checker = function($file) {
                 return \F3::get('im')->hasThumbnail($file);
             };
             $itemPath = 'data/thumbnails/';
-        } elseif ($type == 'icons') {
+        } elseif ($type === 'icons') {
             $checker = function($file) {
                 return \F3::get('im')->hasIcon($file);
             };
@@ -452,7 +454,7 @@ class ContentLoader {
         }
 
         foreach (scandir($itemPath) as $file) {
-            if (is_file($itemPath . $file) && $file != '.htaccess') {
+            if (is_file($itemPath . $file) && $file !== '.htaccess') {
                 $inUsage = $checker($file);
                 if ($inUsage === false) {
                     unlink($itemPath . $file);
@@ -469,7 +471,7 @@ class ContentLoader {
      */
     protected function updateSource($source, $lastEntry) {
         // remove previous error
-        if (!is_null($source['error'])) {
+        if ($source['error'] !== null) {
             $this->sourceDao->error($source['id'], '');
         }
         // save last update

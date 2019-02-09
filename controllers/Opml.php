@@ -63,10 +63,10 @@ class Opml extends BaseController {
 
         try {
             $opml = $_FILES['opml'];
-            if ($opml['error'] == UPLOAD_ERR_NO_FILE) {
+            if ($opml['error'] === UPLOAD_ERR_NO_FILE) {
                 throw new \Exception('No file uploaded!');
             }
-            if (!in_array($opml['type'], ['application/xml', 'text/xml', 'text/x-opml+xml', 'text/x-opml'])) {
+            if (!in_array($opml['type'], ['application/xml', 'text/xml', 'text/x-opml+xml', 'text/x-opml'], true)) {
                 throw new \Exception('Unsupported file type: ' . $opml['type']);
             }
 
@@ -90,7 +90,7 @@ class Opml extends BaseController {
                 $this->show();
             } else { // On success bring them back to their subscription list
                 $amount = count($this->imported);
-                $this->msg = 'Success! ' . $amount . ' feed' . ($amount != 1 ? 's have' : ' has') . ' been imported.<br>' .
+                $this->msg = 'Success! ' . $amount . ' feed' . ($amount !== 1 ? 's have' : ' has') . ' been imported.<br>' .
                     'You might want to <a href="update">update now</a> or <a href="./">view your feeds</a>.';
                 $this->msgclass = 'success';
                 $this->show();
@@ -105,11 +105,14 @@ class Opml extends BaseController {
     /**
      * Process a group of outlines
      *
+     * - Recursive
+     * - We use non-rss outline’s text as tags
+     * - Reads outline elements from both the default and selfoss namespace
+     *
      * @param SimpleXMLElement $xml A SimpleXML object with <outline> children
      * @param array $tags An array of tags for the current <outline>
-     * @note Recursive
-     * @note We use non-rss outline's text as tags
-     * @note Reads outline elements from both the default and selfoss namespace
+     *
+     * @return string[] titles of feeds that could not be added to subscriptions
      */
     private function processGroup(SimpleXMLElement $xml, array $tags = []) {
         $errors = [];
@@ -118,12 +121,12 @@ class Opml extends BaseController {
 
         // tags are the words of the outline parent
         $title = (string) $xml->attributes(null)->title;
-        if ($title != null && $title != '/') {
+        if ($title !== '' && $title !== '/') {
             $tags[] = $title;
             // for new tags, try to import tag color, otherwise use random color
             if (!$this->tagsDao->hasTag($title)) {
                 $tagColor = (string) $xml->attributes('selfoss', true)->color;
-                if ($tagColor != null) {
+                if ($tagColor !== '') {
                     $this->tagsDao->saveTagColor($title, $tagColor);
                 } else {
                     $this->tagsDao->autocolorTag($title);
@@ -154,7 +157,7 @@ class Opml extends BaseController {
      * @param SimpleXMLElement $xml xml feed entry for item
      * @param array $tags of the entry
      *
-     * @return bool true on success or item title on error
+     * @return bool|string true on success or item title on error
      */
     private function addSubscription(SimpleXMLElement $xml, array $tags) {
         // OPML Required attributes: text, xmlUrl, type
@@ -166,7 +169,7 @@ class Opml extends BaseController {
 
         // description
         $title = (string) $attrs->text;
-        if ($title == null) {
+        if ($title === '') {
             $title = (string) $attrs->title;
         }
 
@@ -184,7 +187,7 @@ class Opml extends BaseController {
             }
             $spout = (string) $nsattrs->spout;
             $data = json_decode(html_entity_decode((string) $nsattrs->params), true);
-        } elseif (in_array((string) $attrs->type, ['rss', 'atom'])) {
+        } elseif (in_array((string) $attrs->type, ['rss', 'atom'], true)) {
             $spout = 'spouts\rss\feed';
         } else {
             \F3::get('logger')->warning("OPML import: failed to import '$title'");
@@ -227,8 +230,11 @@ class Opml extends BaseController {
     /**
      * Generate an OPML outline element from a source
      *
-     * @param array $source source
      * @note Uses the selfoss namespace to store information about spouts
+     *
+     * @param array $source source
+     *
+     * @return void
      */
     private function writeSource(array $source) {
         // retrieve the feed url of the source
@@ -236,7 +242,7 @@ class Opml extends BaseController {
         $feedUrl = $this->spoutLoader->get($source['spout'])->getXmlUrl($params);
 
         // if the spout doesn't return a feed url, the source isn't an RSS feed
-        if ($feedUrl !== false) {
+        if ($feedUrl !== null) {
             $this->writer->startElement('outline');
         } else {
             $this->writer->startElementNS('selfoss', 'outline', null);
@@ -245,7 +251,7 @@ class Opml extends BaseController {
         $this->writer->writeAttribute('title', $source['title']);
         $this->writer->writeAttribute('text', $source['title']);
 
-        if ($feedUrl !== false) {
+        if ($feedUrl !== null) {
             $this->writer->writeAttribute('xmlUrl', $feedUrl);
             $this->writer->writeAttribute('type', 'rss');
         }
@@ -262,6 +268,8 @@ class Opml extends BaseController {
      * Export user's subscriptions to OPML file
      *
      * @note Uses the selfoss namespace to store selfoss-specific information
+     *
+     * @return void
      */
     public function export() {
         $this->needsLoggedIn();
@@ -343,7 +351,8 @@ class Opml extends BaseController {
         \F3::get('logger')->debug('finished OPML export');
 
         // save content as file and suggest file name
-        header('Content-Disposition: attachment; filename="selfoss-subscriptions.xml"');
+        $exportName = 'selfoss-subscriptions-' . date('YmdHis') . '.xml';
+        header('Content-Disposition: attachment; filename="' . $exportName . '"');
         header('Content-Type: text/xml; charset=UTF-8');
         echo $this->writer->outputMemory();
     }

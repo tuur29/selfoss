@@ -14,29 +14,9 @@ class feed extends \spouts\spout {
     public $name = 'RSS Feed';
 
     /** @var string description of this source type */
-    public $description = 'An default RSS Feed as source';
+    public $description = 'Get posts from plain RSS/Atom feed.';
 
-    /**
-     * config params
-     * array of arrays with name, type, default value, required, validation type
-     *
-     * - Values for type: text, password, checkbox
-     * - Values for validation: alpha, email, numeric, int, alnum, notempty
-     *
-     * e.g.
-     * array(
-     *   "id" => array(
-     *     "title"      => "URL",
-     *     "type"       => "text",
-     *     "default"    => "",
-     *     "required"   => true,
-     *     "validation" => array("alnum")
-     *   ),
-     *   ....
-     * )
-     *
-     * @var bool|mixed
-     */
+    /** @var array configurable parameters */
     public $params = [
         'url' => [
             'title' => 'URL',
@@ -47,13 +27,13 @@ class feed extends \spouts\spout {
         ]
     ];
 
-    /** @var array|bool current fetched items */
-    protected $items = false;
+    /** @var ?array current fetched items */
+    protected $items = null;
 
-    /** @var string URL of the source */
-    protected $htmlUrl = '';
+    /** @var ?string URL of the source */
+    protected $htmlUrl = null;
 
-    /** @var string URL of the favicon */
+    /** @var ?string URL of the favicon */
     protected $faviconUrl = null;
 
     //
@@ -66,7 +46,7 @@ class feed extends \spouts\spout {
      * @return void
      */
     public function rewind() {
-        if ($this->items !== false) {
+        if ($this->items !== null) {
             reset($this->items);
         }
     }
@@ -77,7 +57,7 @@ class feed extends \spouts\spout {
      * @return \SimplePie_Item current item
      */
     public function current() {
-        if ($this->items !== false) {
+        if ($this->items !== null) {
             return $this;
         }
 
@@ -90,7 +70,7 @@ class feed extends \spouts\spout {
      * @return mixed key of current item
      */
     public function key() {
-        if ($this->items !== false) {
+        if ($this->items !== null) {
             return key($this->items);
         }
 
@@ -103,7 +83,7 @@ class feed extends \spouts\spout {
      * @return \SimplePie_Item next item
      */
     public function next() {
-        if ($this->items !== false) {
+        if ($this->items !== null) {
             next($this->items);
         }
 
@@ -116,7 +96,7 @@ class feed extends \spouts\spout {
      * @return bool false if end reached
      */
     public function valid() {
-        if ($this->items !== false) {
+        if ($this->items !== null) {
             return current($this->items) !== false;
         }
 
@@ -132,16 +112,16 @@ class feed extends \spouts\spout {
      * I supress all Warnings of SimplePie for ensuring
      * working plugin in PHP Strict mode
      *
-     * @param mixed $params the params of this source
+     * @param array $params the params of this source
      *
      * @return void
      */
-    public function load($params) {
+    public function load(array $params) {
         // initialize simplepie feed loader
         $this->feed = @new \SimplePie();
         @$this->feed->set_cache_location(\F3::get('cache'));
         @$this->feed->set_cache_duration(1800);
-        @$this->feed->set_file_class('\helpers\SimplePieFileGuzzle');
+        @$this->feed->set_file_class(\helpers\SimplePieFileGuzzle::class);
         @$this->feed->set_feed_url(htmlspecialchars_decode($params['url']));
         @$this->feed->set_autodiscovery_level(SIMPLEPIE_LOCATOR_AUTODISCOVERY | SIMPLEPIE_LOCATOR_LOCAL_EXTENSION | SIMPLEPIE_LOCATOR_LOCAL_BODY);
         $this->feed->set_useragent(\helpers\WebClient::getUserAgent());
@@ -173,25 +153,21 @@ class feed extends \spouts\spout {
     /**
      * returns the xml feed url for the source
      *
-     * @param mixed $params params for the source
+     * @param array $params params for the source
      *
-     * @return string url as xml
+     * @return ?string url as xml
      */
-    public function getXmlUrl($params) {
-        return isset($params['url']) ? html_entity_decode($params['url']) : false;
+    public function getXmlUrl(array $params) {
+        return isset($params['url']) ? html_entity_decode($params['url']) : null;
     }
 
     /**
      * returns the global html url for the source
      *
-     * @return string url as html
+     * @return ?string url as html
      */
     public function getHtmlUrl() {
-        if (isset($this->htmlUrl)) {
-            return $this->htmlUrl;
-        }
-
-        return false;
+        return $this->htmlUrl;
     }
 
     /**
@@ -200,7 +176,7 @@ class feed extends \spouts\spout {
      * @return string id as hash
      */
     public function getId() {
-        if ($this->items !== false && $this->valid()) {
+        if ($this->items !== null && $this->valid()) {
             $id = @current($this->items)->get_id();
             if (strlen($id) > 255) {
                 $id = md5($id);
@@ -209,7 +185,7 @@ class feed extends \spouts\spout {
             return $id;
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -218,11 +194,11 @@ class feed extends \spouts\spout {
      * @return string title
      */
     public function getTitle() {
-        if ($this->items !== false && $this->valid()) {
+        if ($this->items !== null && $this->valid()) {
             return htmlspecialchars_decode(@current($this->items)->get_title());
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -231,11 +207,11 @@ class feed extends \spouts\spout {
      * @return string content
      */
     public function getContent() {
-        if ($this->items !== false && $this->valid()) {
+        if ($this->items !== null && $this->valid()) {
             return @current($this->items)->get_content();
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -248,7 +224,7 @@ class feed extends \spouts\spout {
             return $this->faviconUrl;
         }
 
-        $this->faviconUrl = false;
+        $this->faviconUrl = null;
         $imageHelper = $this->getImageHelper();
         $htmlUrl = $this->getHtmlUrl();
         if ($htmlUrl && $imageHelper->fetchFavicon($htmlUrl, true)) {
@@ -271,13 +247,13 @@ class feed extends \spouts\spout {
      * @return string link
      */
     public function getLink() {
-        if ($this->items !== false && $this->valid()) {
+        if ($this->items !== null && $this->valid()) {
             $link = @current($this->items)->get_link();
 
             return $link;
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -286,10 +262,10 @@ class feed extends \spouts\spout {
      * @return string date
      */
     public function getDate() {
-        if ($this->items !== false && $this->valid()) {
+        if ($this->items !== null && $this->valid()) {
             $date = @current($this->items)->get_date('Y-m-d H:i:s');
         }
-        if (strlen($date) == 0) {
+        if (strlen($date) === 0) {
             $date = date('Y-m-d H:i:s');
         }
 
@@ -302,7 +278,7 @@ class feed extends \spouts\spout {
      * @return string author
      */
     public function getAuthor() {
-        if ($this->items !== false && $this->valid()) {
+        if ($this->items !== null && $this->valid()) {
             $author = @current($this->items)->get_author();
             if (isset($author)) {
                 $name = $author->get_name();
@@ -323,6 +299,6 @@ class feed extends \spouts\spout {
     public function destroy() {
         $this->feed->__destruct();
         unset($this->items);
-        $this->items = false;
+        $this->items = null;
     }
 }
