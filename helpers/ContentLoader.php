@@ -170,6 +170,7 @@ class ContentLoader {
 
             // Check sanitized title against filter
             if ($this->filter($source, $title, $content) === false) {
+                \F3::get('logger')->debug('filter blocked insertion');
                 continue;
             }
 
