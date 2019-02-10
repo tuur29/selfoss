@@ -31,7 +31,7 @@ class Index extends BaseController {
                 $_SESSION['loggedin'] = true;
                 echo "<script>
                     window.localStorage.setItem('onlineSession', true);
-                    window.localStorage.setItem('enableOffline', true);
+                    window.localStorage.setItem('enableOffline', false);
                     window.location = window.location.href.split('#')[0];
                 </script>";
             }
