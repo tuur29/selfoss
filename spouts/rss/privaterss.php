@@ -49,7 +49,7 @@ class privaterss extends feed {
      *
      * @return void
      */
-    public function load($params) {
+    public function load(array $params) {
         // initialize simplepie feed loader
         $this->feed = @new \SimplePie();
         @$this->feed->set_cache_location(\F3::get('cache'));

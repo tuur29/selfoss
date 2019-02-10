@@ -99,7 +99,7 @@ class parseregex extends \spouts\spout {
      *
      * @return void
      */
-    public function load($params) {
+    public function load(array $params) {
 
         $this->htmlUrl = $params['url'];
         if (!empty($params['iconurl'])) {
@@ -381,7 +381,7 @@ class parseregex extends \spouts\spout {
      *
      * @return string url as xml
      */
-    public function getXmlUrl($params) {
+    public function getXmlUrl(array $params) {
         return $this->getHtmlUrl();
     }
 
