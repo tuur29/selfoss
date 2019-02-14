@@ -21,7 +21,7 @@ class Sources extends Database {
      *
      * @return int new id
      */
-    public function add($title, array $tags, $filter, $spout, array $params) {
+    public function add($title, array $tags, $filter, $spout, array $params, $enabled) {
         return $this->stmt->insert('INSERT INTO ' . \F3::get('db_prefix') . 'sources (title, tags, filter, spout, params, enabled) VALUES (:title, :tags, :filter, :spout, :params, :enabled)', [
             ':title' => trim($title),
             ':tags' => $this->stmt->csvRow($tags),
@@ -44,7 +44,7 @@ class Sources extends Database {
      *
      * @return void
      */
-    public function edit($id, $title, array $tags, $filter, $spout, array $params) {
+    public function edit($id, $title, array $tags, $filter, $spout, array $params, $enabled) {
         \F3::get('db')->exec('UPDATE ' . \F3::get('db_prefix') . 'sources SET title=:title, tags=:tags, filter=:filter, spout=:spout, params=:params, enabled=:enabled WHERE id=:id', [
             ':title' => trim($title),
             ':tags' => $this->stmt->csvRow($tags),
