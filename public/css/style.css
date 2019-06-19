@@ -822,6 +822,7 @@ body * {
 .source-showparams,
 .source-delete,
 .source-save,
+.source-copy,
 .source-cancel {
     padding: 0;
     background: transparent;
@@ -1092,6 +1093,7 @@ body.authenabled.loggedin #nav-logout {
     .source-showparams,
     .source-delete,
     .source-save,
+    .source-copy,
     .source-cancel,
     .source-refresh {
         color:#333;
@@ -1374,6 +1376,7 @@ body.authenabled.loggedin #nav-logout {
         .source-showparams,
         .source-delete,
         .source-save,
+        .source-copy,
         .source-cancel {
             font-size:1.3em;
         }

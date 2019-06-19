@@ -14,6 +14,21 @@ selfoss.events.sources = function() {
         }
     });
 
+    $('.source-copy').unbind('click').click(function() {
+        var parent = $(this).parents('.source');
+        if (!parent.hasClass('source-new')) {
+            $('.source-add').click();
+            setTimeout(function() {
+                var newForm = parent.find('.source-edit-form').html();
+
+                $('.source-new .source-edit-form').html(newForm);
+                setTimeout(function() {
+                    selfoss.events.sources();
+                }, 10);
+            }, 1000);
+        }
+    });
+
     // add new source
     $('.source-add').unbind('click').click(function() {
         $.ajax({
@@ -22,7 +37,7 @@ selfoss.events.sources = function() {
             success: function(response) {
                 $('.source-opml').after(response);
                 selfoss.events.sources();
-                $(".source-new .source-spout").val("spouts_rss_feed").trigger("change");
+                $('.source-new .source-spout').val('spouts_rss_feed').trigger('change');
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 parent.find('.source-edit-delete').removeClass('loading');
