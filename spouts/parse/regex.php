@@ -25,13 +25,6 @@ class regex extends \spouts\parse\feed {
      * @var bool|mixed
      */
     public $params = [
-        'url' => [
-            'title' => 'URL',
-            'type' => 'url',
-            'default' => '',
-            'required' => true,
-            'validation' => ['notempty']
-        ],
         'titleselector' => [
             'title' => 'Title selector',
             'type' => 'text',
@@ -56,32 +49,13 @@ class regex extends \spouts\parse\feed {
             'type' => 'text',
             'default' => '/timestamp/U',
             'required' => false
-        ],
-        'cookies' => [
-            'title' => 'Cookies (optional)',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
-        ],
-        'proxy' => [
-            'title' => 'SOCKS5 Proxy (optional, user:pass ; ip:port)',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
-        ],
-        'baseurl' => [
-            'title' => 'Base url (optional, linkselector match gets appended)',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
-        ],
-        'iconurl' => [
-            'title' => 'Manually set icon url',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
         ]
     ];
+
+    public function __construct() {
+        // add default parsing settings
+        $this->params = array_merge(parent::$firstParams, $this->params, parent::$lastParams);
+    }
 
     /**
      * loads content for given source
@@ -129,7 +103,7 @@ class regex extends \spouts\parse\feed {
 
         // parse and add items
         $array = array();
-        for ($i=0; $i < sizeof($titleNodes); $i++) {
+        for ($i=0; $i < count($titleNodes); $i++) {
 
             // prepend link
             $link = isset($linkNodes) ? $linkNodes[$i] : '';

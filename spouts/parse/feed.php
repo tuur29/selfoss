@@ -18,7 +18,6 @@ class feed extends \spouts\spout {
     /** @var string description of this source type */
     public $description = '';
 
-    
     /**
      * config params
      * array of arrays with name, type, default value, required, validation type
@@ -26,6 +25,43 @@ class feed extends \spouts\spout {
      * @var bool|mixed
      */
     public $params = [];
+
+    protected static $firstParams = [
+        'url' => [
+            'title' => 'URL',
+            'type' => 'url',
+            'default' => '',
+            'required' => true,
+            'validation' => ['notempty']
+        ]
+    ];
+
+    protected static $lastParams = [
+        'cookies' => [
+            'title' => 'Cookies (optional)',
+            'type' => 'text',
+            'default' => '',
+            'required' => false
+        ],
+        'proxy' => [
+            'title' => 'SOCKS5 Proxy (optional, user:pass ; ip:port)',
+            'type' => 'text',
+            'default' => '',
+            'required' => false
+        ],
+        'baseurl' => [
+            'title' => 'Base url (optional, linkselector match gets appended)',
+            'type' => 'text',
+            'default' => '',
+            'required' => false
+        ],
+        'iconurl' => [
+            'title' => 'Manually set icon url',
+            'type' => 'text',
+            'default' => '',
+            'required' => false
+        ]
+    ];
 
     /** @var array|bool current fetched items */
     protected $items = false;
