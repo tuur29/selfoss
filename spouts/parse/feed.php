@@ -1,6 +1,6 @@
 <?php
 
-namespace spouts\html;
+namespace spouts\parse;
 
 /**
  * Spout for parsing a html page with XPath
@@ -11,77 +11,21 @@ namespace spouts\html;
  * @author     Daniel Seither <post@tiwoc.de>
  * @author     Tuur Lievens
  */
-class parsehtml extends \spouts\spout {
+class feed extends \spouts\spout {
     /** @var string name of spout */
-    public $name = 'Parse HTML with XPath';
+    public $name = '';
 
     /** @var string description of this source type */
-    public $description = 'Parse a html page with XPath';
+    public $description = '';
 
+    
     /**
      * config params
      * array of arrays with name, type, default value, required, validation type
      *
      * @var bool|mixed
      */
-    public $params = [
-        'url' => [
-            'title' => 'URL',
-            'type' => 'url',
-            'default' => '',
-            'required' => true,
-            'validation' => ['notempty']
-        ],
-        'titleselector' => [
-            'title' => 'Title selector',
-            'type' => 'text',
-            'default' => '//article//h1[@class=\'title\']',
-            'required' => true,
-            'validation' => ['notempty']
-        ],
-        'linkselector' => [
-            'title' => 'Link selector',
-            'type' => 'text',
-            'default' => '//article//a',
-            'required' => false
-        ],
-        'contentselector' => [
-            'title' => 'Content selector',
-            'type' => 'text',
-            'default' => '//article',
-            'required' => false
-        ],
-        'timestampselector' => [
-            'title' => 'Timestamp selector',
-            'type' => 'text',
-            'default' => '//article//p[@class=\'timestamp\']',
-            'required' => false
-        ],
-        'cookies' => [
-            'title' => 'Cookies (optional)',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
-        ],
-        'proxy' => [
-            'title' => 'SOCKS5 Proxy (optional, user:pass ; ip:port)',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
-        ],
-        'baseurl' => [
-            'title' => 'Base url (optional, linkselector match gets appended)',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
-        ],
-        'iconurl' => [
-            'title' => 'Manually set icon url',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
-        ]
-    ];
+    public $params = [];
 
     /** @var array|bool current fetched items */
     protected $items = false;
@@ -115,53 +59,7 @@ class parsehtml extends \spouts\spout {
         if (empty($content))
             throw new \Exception("Empty or non-existant page! (Might also be a proxy error)");
 
-        $dom = new \DOMDocument();
-        @$dom->loadHTML($content);
-        if (!$dom) {
-            return false;
-        }
-        $xpath = new \DOMXPath($dom);
-
-        // get titles
-        $titleNodes = $xpath->query($params['titleselector']);
-        if (!empty($params['linkselector']))
-            $linkNodes = $xpath->query($params['linkselector']);
-        if (!empty($params['contentselector']))
-            $contentNodes = $xpath->query($params['contentselector']);
-        if (!empty($params['timestampselector']))
-            $timestampNodes = $xpath->query($params['timestampselector']);
-
-        // validation
-        if ($titleNodes->length < 1)
-            throw new \Exception("Cannot find any posts with current title selector");
-
-        if (isset($linkNodes) && $titleNodes->length != $linkNodes->length )
-            throw new \Exception("Selectors don't return an equal amount of items! (titles != links)");
-
-        if (isset($contentNodes) && $titleNodes->length != $contentNodes->length )
-            throw new \Exception("Selectors don't return an equal amount of items! (titles != content)");
-
-        if (isset($timestampNodes) && $titleNodes->length != $timestampNodes->length )
-            throw new \Exception("Selectors don't return an equal amount of items! (titles != timestamp)");
-
-        // parse and add items
-        $array = array();
-        for ($i=0; $i < $titleNodes->length; $i++) {
-
-            // prepend link
-            $link = isset($linkNodes) ? $linkNodes[$i]->getAttribute('href') : "";
-            if (!empty($params['baseurl']))
-                $link = $params['baseurl'] . $link;
-
-            $array[$i] = [
-                'title' => $titleNodes[$i]->textContent,
-                'link' => $link,
-                'content' => isset($contentNodes) ? $contentNodes[$i]->C14N() : "",
-                'timestamp' => isset($timestampNodes) ? $timestampNodes[$i]->textContent : ""
-            ];
-        }
-
-        $this->items = $array;
+        return $content;
     }
 
     //
@@ -319,7 +217,7 @@ class parsehtml extends \spouts\spout {
         return $this->faviconUrl;
     }
 
-    private function getRootUrl($url) {
+    protected function getRootUrl($url) {
         return parse_url($url, PHP_URL_SCHEME) . "://" . parse_url($url, PHP_URL_HOST) . (!empty(parse_url($url, PHP_URL_PORT)) ? ":" . parse_url($url, PHP_URL_PORT) : "" ) . "/";
     }
 
@@ -364,7 +262,7 @@ class parsehtml extends \spouts\spout {
         return isset($timestamp) ? $timestamp : $this->convertTimestamp(time());
     }
 
-    private function convertTimestamp($input) {
+    protected function convertTimestamp($input) {
         return date('Y-m-d H:i:s', $input);
     }
 
@@ -389,7 +287,7 @@ class parsehtml extends \spouts\spout {
 
     // HELPERS
 
-    private function file_get_contents_curl($url, $params) {
+    protected function file_get_contents_curl($url, $params) {
         $ch = curl_init();
 
         // some sites need a user-agent
@@ -421,4 +319,15 @@ class parsehtml extends \spouts\spout {
         // \F3::get('logger')->debug('received data: ' . $data);
         return $data;
     }
+
+    protected function log($params, $content) {
+        \F3::get('logger')->debug($this->title." data: \n"
+            .$params['titleselector']."\n"
+            .$params['linkselector']."\n"
+            .$params['timestampselector']."\n"
+            .$params['contentselector']."\n"
+            .$content
+        );
+    }
+
 }
