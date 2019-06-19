@@ -26,7 +26,7 @@
 
     <!-- icon -->
     <a href="<?= \helpers\Anonymizer::anonymize($this->item['link']); ?>" class="entry-icon" tabindex="-1" rel="noopener noreferrer">
-        <img src="<?= 'favicons/' . $this->item['icon']; ?>" alt="" >
+        <img src="<?= 'favicons/' . ($this->item['icon'] ?: (\F3::get('darkmode') == true ? "../images/logo.png" : "../images/logo-inv.png")); ?>" alt="" >
     </a>
 
     <!-- title -->
