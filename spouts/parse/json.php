@@ -13,7 +13,7 @@ namespace spouts\parse;
  */
 class json extends \spouts\parse\feed {
     /** @var string name of spout */
-    public $name = 'Parse JSON';
+    public $name = 'Parse text with JSON';
 
     /** @var string description of this source type */
     public $description = 'Parse a JSON file';
@@ -25,69 +25,49 @@ class json extends \spouts\parse\feed {
      * @var bool|mixed
      */
     public $params = [
-        'arraypath' => [
-            'title' => 'Array path',
+        'jsonselector' => [
+            'title' => 'Root array regex (optional)',
             'type' => 'text',
-            'default' => '',
+            'default' => '/var array = ([^;]+);/Um',
             'required' => false,
         ],
-        'url' => [
-            'title' => 'URL',
-            'type' => 'url',
-            'default' => '',
-            'required' => true,
-            'validation' => ['notempty']
+        'arrayselector' => [
+            'title' => 'Array with posts Path',
+            'type' => 'text',
+            'default' => 'blogs.0.posts',
+            'required' => false,
         ],
         'titleselector' => [
             'title' => 'Title Path',
             'type' => 'text',
-            'default' => '.title',
+            'default' => 'meta.title',
             'required' => true,
             'validation' => ['notempty']
         ],
         'linkselector' => [
             'title' => 'Link Path',
             'type' => 'text',
-            'default' => '.link',
+            'default' => 'meta.permalink',
             'required' => false
         ],
         'contentselector' => [
             'title' => 'Content selector',
             'type' => 'text',
-            'default' => '.description',
+            'default' => 'content.text',
             'required' => false
         ],
         'timestampselector' => [
             'title' => 'Timestamp selector',
             'type' => 'text',
-            'default' => '.date',
-            'required' => false
-        ],
-        'cookies' => [
-            'title' => 'Cookies (optional)',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
-        ],
-        'proxy' => [
-            'title' => 'SOCKS5 Proxy (optional, user:pass ; ip:port)',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
-        ],
-        'baseurl' => [
-            'title' => 'Base url (optional, linkselector match gets appended)',
-            'type' => 'text',
-            'default' => '',
-            'required' => false
-        ],
-        'iconurl' => [
-            'title' => 'Manually set icon url',
-            'type' => 'text',
-            'default' => '',
+            'default' => 'meta.timestamp',
             'required' => false
         ]
     ];
+
+    public function __construct() {
+        // add default parsing settings
+        $this->params = array_merge(parent::$firstParams, $this->params, parent::$lastParams);
+    }
 
     /**
      * loads content for given source
@@ -98,67 +78,90 @@ class json extends \spouts\parse\feed {
      */
     public function load(array $params) {
 
-        $this->htmlUrl = $params['url'];
-        if (!empty($params['iconurl'])) {
-            $this->faviconUrl = $params['iconurl'];
+        $content = parent::load($params);
+
+        if (empty($params['jsonselector']))
+            $json = json_decode($content, true);
+        else {
+            preg_match($params['jsonselector'], $content, $match);
+            $json = json_decode($match[1], true);
         }
 
-        if (function_exists('curl_init') && !ini_get('open_basedir')) {
-            $content = $this->file_get_contents_curl($this->htmlUrl, $params);
+        // \F3::get('logger')->debug(print_r($json, true));
+
+        if (empty($params['arrayselector'])) {
+            $dataArray = $json;
         } else {
-            $content = @file_get_contents($this->htmlUrl);
+            $dataArray = $this->accessPath($params['arrayselector'], $json);
         }
 
-        if (empty($content))
-            throw new \Exception("Empty or non-existant page! (Might also be a proxy error)");
-
-        // TODO: change to JSON parsing
-        // TODO: extract helpers to superclass
         // get titles
-        preg_match_all($params['titleselector'], $content, $titleNodes);
-        if (!empty($params['linkselector']))
-            preg_match_all($params['linkselector'], $content, $linkNodes);
-        if (!empty($params['contentselector']))
-            preg_match_all($params['contentselector'], $content, $contentNodes);
-        if (!empty($params['timestampselector']))
-            preg_match_all($params['timestampselector'], $content, $timestampNodes);
+        $titleNodes = [];
+        $linkNodes = [];
+        $contentNodes = [];
+        $timestampNodes = [];
+        foreach ($dataArray as $key => $value) {
+            array_push($titleNodes, $this->accessPath($params['titleselector'], $dataArray[$key]));
+            if (!empty($params['linkselector']))
+                array_push($linkNodes, $this->accessPath($params['linkselector'], $dataArray[$key]));
+            if (!empty($params['contentselector']))
+                array_push($contentNodes, $this->accessPath($params['contentselector'], $dataArray[$key]));
+            if (!empty($params['timestampselector']))
+                array_push($timestampNodes, $this->accessPath($params['timestampselector'], $dataArray[$key]));
+        }
 
-        // \F3::get('logger')->debug('json '.$params['titleselector']);
-        // \F3::get('logger')->debug('json '.$params['linkselector']);
-        // \F3::get('logger')->debug('json '.$params['timestampselector']);
-        // \F3::get('logger')->debug('content '.$content);
+        // $this->log($params, $content);
+        // \F3::get('logger')->debug(print_r($titleNodes, true));
 
         // validation
         if (empty($titleNodes))
             throw new \Exception("Cannot find any posts with current title selector");
 
-        if (isset($linkNodes) && $titleNodes->length != $linkNodes->length )
+        if (!empty($params['linkselector']) && count($titleNodes) != count($linkNodes))
             throw new \Exception("Selectors don't return an equal amount of items! (titles != links)");
 
-        if (isset($contentNodes) && $titleNodes->length != $contentNodes->length )
+        if (!empty($params['contentselector']) && count($titleNodes) != count($contentNodes))
             throw new \Exception("Selectors don't return an equal amount of items! (titles != content)");
 
-        if (isset($timestampNodes) && $titleNodes->length != $timestampNodes->length )
+        if (!empty($params['timestampselector']) && count($titleNodes) != count($timestampNodes))
             throw new \Exception("Selectors don't return an equal amount of items! (titles != timestamp)");
 
         // parse and add items
         $array = array();
-        for ($i=0; $i < sizeof($titleNodes[1]); $i++) {
+        for ($i=0; $i < count($titleNodes); $i++) {
 
             // prepend link
-            $link = isset($linkNodes) ? $linkNodes[1][$i] : '';
+            $link = isset($linkNodes) ? $linkNodes[$i] : '';
             if (!empty($params['baseurl']))
                 $link = $params['baseurl'] . $link;
 
             $array[$i] = [
-                'title' => $titleNodes[1][$i],
+                'title' => $titleNodes[$i],
                 'link' => $link,
-                'content' => isset($contentNodes) ? $contentNodes[1][$i] : '',
-                'timestamp' => isset($timestampNodes) ? $timestampNodes[1][$i] : ''
+                'content' => isset($contentNodes) ? $contentNodes[$i] : '',
+                'timestamp' => isset($timestampNodes) ? $timestampNodes[$i] : ''
             ];
         }
 
         $this->items = $array;
+    }
+
+    private function accessPath($pathString, $object) {
+
+        $path = explode(".", $pathString);
+        $lastChild = $object;
+
+        foreach ($path as $index => $key) {
+            if (!array_key_exists($key ,$lastChild)) {
+                throw new \Exception("No value found for key ".$key." in object ".print_r($lastChild, true));
+            }
+            $lastChild = $lastChild[$key];
+        }
+
+        if ($lastChild == $object)
+            throw new \Exception("No value found for path ".$pathString);
+
+        return $lastChild;
     }
 
 }
