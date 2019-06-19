@@ -26,7 +26,9 @@
 
     <!-- icon -->
     <a href="<?= \helpers\Anonymizer::anonymize($this->item['link']); ?>" class="entry-icon" tabindex="-1" rel="noopener noreferrer">
-        <img src="<?= 'favicons/' . ($this->item['icon'] ?: (\F3::get('darkmode') == true ? "../images/logo.png" : "../images/logo-inv.png")); ?>" alt="" >
+        <?php $icon = (substr($this->item['icon'], 0, 4) === 'http' ? '' : 'favicons/') . $this->item['icon'] ?>
+        <?php $fallback = \F3::get('darkmode') == true ? "images/logo.png" : "images/logo-inv.png" ?>
+        <img src="<?= ($this->item['icon'] ? $icon : "../".$fallback); ?>" alt="" onerror="if (this.src != '<?= $fallback ?>') this.src = '<?= $fallback ?>';">
     </a>
 
     <!-- title -->

@@ -2,9 +2,9 @@
 <div role="form" id="source<?= $idAttr ?>"
         class="source <?= isset($this->source) === false ? 'source-new' : '' ?> <?= (isset($this->source) && isset($this->source['error']) && strlen($this->source['error']) > 0) ? 'error' : '' ?> <?= ($this->source['enabled'] ? "source-enabled" : "source-disabled") ?>">
     <div class="source-icon">
-        <?php if (isset($this->source) && isset($this->source['icon']) && $this->source['icon'] != '0') : ?>
-        <img src="<?= 'favicons/' . $this->source['icon']; ?>" alt="" />
-        <?php endif; ?>
+        <?php $icon = (substr($this->source['icon'], 0, 4) === 'http' ? '' : 'favicons/') . $this->source['icon'] ?>
+        <?php $fallback = \F3::get('darkmode') == true ? "images/logo.png" : "images/logo-inv.png" ?>
+        <img src="<?= ($this->source['icon'] ? $icon : "../".$fallback); ?>" alt="" onerror="if (this.src != '<?= $fallback ?>') this.src = '<?= $fallback ?>';">
     </div>
 
     <div class="source-title"><?= isset($this->source) ? $this->source['title'] : \F3::get('lang_source_new'); ?></div>

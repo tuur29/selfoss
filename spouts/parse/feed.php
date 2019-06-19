@@ -82,6 +82,7 @@ class feed extends \spouts\spout {
     public function load(array $params) {
 
         $this->htmlUrl = $params['url'];
+
         if (!empty($params['iconurl'])) {
             $this->faviconUrl = $params['iconurl'];
         }
@@ -235,15 +236,19 @@ class feed extends \spouts\spout {
         try {
             $imageHelper = $this->getImageHelper();
             $htmlUrl = $this->getHtmlUrl();
+
             if ($htmlUrl && $imageHelper->fetchFavicon($htmlUrl, true)) {
                 $this->faviconUrl = $imageHelper->getFaviconUrl();
                 \F3::get('logger')->debug('icon: using feed homepage favicon: ' . $this->faviconUrl);
+
             } else if ($htmlUrl && $imageHelper->fetchFavicon($this->getRootUrl($htmlUrl), true)) {
                 $this->faviconUrl = $imageHelper->getFaviconUrl();
                 \F3::get('logger')->debug('icon: using root domain icon: ' . $this->faviconUrl);
+
             } else if ($htmlUrl && $imageHelper->fetchFavicon($params['baseurl'], true)) {
                 $this->faviconUrl = $imageHelper->getFaviconUrl();
                 \F3::get('logger')->debug('icon: using baseurl icon: ' . $this->faviconUrl);
+
             }
         } catch (\Exception $e) {
             \F3::get('logger')->debug('icon: error', ['exception' => $e]);
