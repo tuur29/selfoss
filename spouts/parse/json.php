@@ -136,10 +136,10 @@ class json extends \spouts\parse\feed {
                 $link = $params['baseurl'] . $link;
 
             $array[$i] = [
-                'title' => $titleNodes[$i],
+                'title' => trim($titleNodes[$i]),
                 'link' => $link,
-                'content' => isset($contentNodes) ? $contentNodes[$i] : '',
-                'timestamp' => isset($timestampNodes) ? $timestampNodes[$i] : ''
+                'content' => isset($contentNodes) ? trim($contentNodes[$i]) : '',
+                'timestamp' => isset($timestampNodes) ? trim($timestampNodes[$i]) : ''
             ];
         }
 

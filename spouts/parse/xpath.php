@@ -110,10 +110,10 @@ class xpath extends \spouts\parse\feed {
                 $link = $params['baseurl'] . $link;
 
             $array[$i] = [
-                'title' => mb_strimwidth($titleNodes[$i]->textContent, 0, 90),
+                'title' => mb_strimwidth(trim($titleNodes[$i]->textContent), 0, 90),
                 'link' => $link,
                 'content' => isset($contentNodes) ? $contentNodes[$i]->C14N() : "",
-                'timestamp' => isset($timestampNodes) ? $timestampNodes[$i]->textContent : ""
+                'timestamp' => isset($timestampNodes) ? trim($timestampNodes[$i]->textContent) : ""
             ];
         }
 

@@ -111,10 +111,10 @@ class regex extends \spouts\parse\feed {
                 $link = $params['baseurl'] . $link;
 
             $array[$i] = [
-                'title' => mb_strimwidth($titleNodes[$i], 0, 90),
+                'title' => mb_strimwidth(trim($titleNodes[$i]), 0, 90),
                 'link' => $link,
-                'content' => isset($contentNodes) ? $contentNodes[$i] : '',
-                'timestamp' => isset($timestampNodes) ? $timestampNodes[$i] : ''
+                'content' => isset($contentNodes) ? trim($contentNodes[$i]) : '',
+                'timestamp' => isset($timestampNodes) ? trim($timestampNodes[$i]) : ''
             ];
         }
 
