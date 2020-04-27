@@ -5,7 +5,7 @@
 self.addEventListener('install', function(event) {
     event.waitUntil(
         caches.open(offlineManifest.version).then(function(cache) {
-            return cache.addAll(offlineManifest.files);
+            return cache.addAll(offlineManifest.files).map(function(url) { return new Request(url, { credentials: 'same-origin' })});
         })
     );
 });
