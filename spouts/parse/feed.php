@@ -335,28 +335,39 @@ class feed extends \spouts\spout {
         curl_setopt($ch, CURLOPT_USERAGENT, $agent);
 
         if (!empty($params['cookies']))
-        curl_setopt($ch, CURLOPT_COOKIE, $params['cookies']);
+            curl_setopt($ch, CURLOPT_COOKIE, $params['cookies']);
         
         if (!empty($params['proxy'])) {
-            $temp = explode(" ; ", $params['proxy']); // 0: user:pass, 1: url
-            curl_setopt($ch, CURLOPT_PROXY, $temp[1]);
-            curl_setopt($ch, CURLOPT_PROXYUSERPWD, $temp[0]);
+            $data = explode(" ; ", $params['proxy']); // 0: user:pass, 1: url
+            
+            // http (port: 80)
+            // $server = explode(":", $data[1]); // ip:port
+            // curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+            // curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 1);
+            // curl_setopt($ch, CURLOPT_PROXY, $server[0]);
+            // curl_setopt($ch, CURLOPT_PROXYPORT, $server[1]);
+            // curl_setopt($ch, CURLOPT_PROXYUSERPWD, $data[0]);
+
+            // socks
             curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+            curl_setopt($ch, CURLOPT_PROXY, $data[1]);
+            curl_setopt($ch, CURLOPT_PROXYUSERPWD, $data[0]);
+
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         }
-        
+
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_URL, $url);
         $data = @curl_exec($ch);
-        curl_close($ch);
 
+        \F3::get('logger')->debug('CURL info: ' . print_r(curl_getinfo($ch), true));
+        curl_close($ch);
         if (!empty($params['cookies']))
             sleep(0.5);
 
-
-        // \F3::get('logger')->debug('received data: ' . $data);
         return $data;
     }
 
