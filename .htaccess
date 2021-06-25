@@ -2,6 +2,9 @@
 RewriteEngine On
 #RewriteBase /selfoss
 
+# exclusion for phpmyadmin
+RewriteRule phpmyadmin/(.*)$ phpmyadmin/$1 [L]
+
 # rule for ACME
 RewriteRule .well-known/(.*) - [L]
 
